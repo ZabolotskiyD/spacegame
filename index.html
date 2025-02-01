@@ -1,15 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Three.js Game</title>
     <style>
-        body { margin: 0; }
-        canvas { display: block; }
+        body {
+            margin: 0;
+        }
+
+        canvas {
+            display: block;
+        }
     </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.146/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.146/examples/jsm/"
+            }
+        }
+    </script>
 </head>
+
 <body>
-    <script src="https://rawcdn.githack.com/ZabolotskiyD/spacegame/f30edbbf406f8676a35351ed880249a20a385c39/main.js"></script>
+    <div id="three-container"></div>
+    <div id="text-overlay">Hello, my guest!</div>
+    <!-- Подключаем main.js как модуль -->
+    <script type="module"
+        src="https://rawcdn.githack.com/ZabolotskiyD/zabolotskiyd.github.io/79a6a25e473685c38ac7e6b410894d132bfa0747/main.js"></script>
 </body>
+
 </html>

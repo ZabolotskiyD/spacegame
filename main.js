@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r146/three.module.js';
+import * as THREE from "three";
 
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
