@@ -1,7 +1,13 @@
 import * as THREE from 'three';
 
-// Создаем сцену и рендерер
+// Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+    60, // Угол обзора (меньше = меньше искажений)
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -11,27 +17,16 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 5, 5);
 scene.add(light);
 
-// Создаем ортографическую камеру
-const aspectRatio = window.innerWidth / window.innerHeight;
-const frustumSize = 10; // Размер видимой области
-const camera = new THREE.OrthographicCamera(
-    -frustumSize * aspectRatio / 2, // левая граница
-     frustumSize * aspectRatio / 2, // правая граница
-    frustumSize / 2,                // верхняя граница
-   -frustumSize / 2,                // нижняя граница
-    0.1,                            // ближняя плоскость отсечения
-    1000                             // дальняя плоскость отсечения
-);
-
-camera.position.set(0, 2, 5); // Позиция камеры
-camera.lookAt(0, 0, 0);       // Камера смотрит в центр
-
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
 player.position.z = 1;
 scene.add(player);
+
+// Начальная позиция камеры
+camera.position.set(0, 3, 8); // Камера выше и дальше от игрока
+camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Управление игроком
 const keys = {};
@@ -44,8 +39,8 @@ window.addEventListener('keyup', (event) => {
 
 function movePlayer() {
     const speed = 0.1;
-    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -5); // Левая граница
-    if (keys['d']) player.position.x = Math.min(player.position.x + speed, 5); // Правая граница
+    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -3); // Левая граница
+    if (keys['d']) player.position.x = Math.min(player.position.x + speed, 3);  // Правая граница
 }
 
 // Враги
@@ -55,8 +50,7 @@ function createEnemy() {
     const material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
     const enemy = new THREE.Mesh(geometry, material);
 
-    // Ограничиваем позицию врага по оси X
-    enemy.position.x = Math.random() * 10 - 5; // Случайная позиция от -5 до 5
+    enemy.position.x = Math.random() * 6 - 3; // Случайная позиция по X
     enemy.position.z = -20; // Начинают далеко позади игрока
     scene.add(enemy);
     enemies.push(enemy);
@@ -179,6 +173,13 @@ function checkEnemyBulletCollisions() {
     });
 }
 
+// Функция для обновления позиции камеры
+function updateCameraPosition() {
+    camera.position.x = player.position.x; // Камера следует за игроком по X
+    camera.position.z = player.position.z + 8; // Камера остаётся позади игрока
+    camera.lookAt(player.position); // Камера смотрит на игрока
+}
+
 // Основной игровой цикл
 function animate() {
     requestAnimationFrame(animate);
@@ -186,11 +187,13 @@ function animate() {
     movePlayer();
     moveEnemies();
     moveBullets();
-    moveEnemyBullets(); // Двигаем пули врагов
-    shootEnemyBullets(); // Враги стреляют
+    moveEnemyBullets();
+    shootEnemyBullets();
     checkCollisions();
-    checkPlayerCollisions(); // Проверяем столкновения игрока с врагами
-    checkEnemyBulletCollisions(); // Проверяем столкновения пуль врагов с игроком
+    checkPlayerCollisions();
+    checkEnemyBulletCollisions();
+
+    updateCameraPosition(); // Обновляем позицию камеры
 
     renderer.render(scene, camera);
 }
@@ -198,14 +201,7 @@ animate();
 
 // Обновление размеров при изменении окна
 window.addEventListener('resize', () => {
-    const aspectRatio = window.innerWidth / window.innerHeight;
-
-    // Обновляем границы камеры
-    camera.left = -frustumSize * aspectRatio / 2;
-    camera.right = frustumSize * aspectRatio / 2;
-    camera.top = frustumSize / 2;
-    camera.bottom = -frustumSize / 2;
-
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
