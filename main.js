@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-    60, // Угол обзора
+    45, // Угол обзора
     window.innerWidth / window.innerHeight,
     0.1,
     1000
