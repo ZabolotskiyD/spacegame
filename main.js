@@ -42,7 +42,7 @@ scene.add(player);
 
 // Начальная позиция камеры
 camera.position.set(0, 2, -2); // Камера выше и сзади игрока
-camera.lookAt(player.position); // Камера смотрит на игрока
+//camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Счётчик убитых врагов
 let killedEnemies = 0;
