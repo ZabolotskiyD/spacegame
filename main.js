@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -78,7 +78,7 @@ function moveEnemies() {
 // Пули
 const bullets = [];
 function shoot() {
-    const geometry = new THREE.SphereGeometry(0.1, 8, 8);
+    const geometry = new THREE.SphereGeometry(0.1, 4, 4);
     const material = new THREE.MeshPhongMaterial({ color: 0xffff00 });
     const bullet = new THREE.Mesh(geometry, material);
 
@@ -136,7 +136,7 @@ function checkPlayerCollisions() {
 // Пули врагов
 const enemyBullets = [];
 function enemyShoot(enemy) {
-    const geometry = new THREE.SphereGeometry(0.1, 8, 8);
+    const geometry = new THREE.SphereGeometry(0.1, 4, 4);
     const material = new THREE.MeshPhongMaterial({ color: 0xff00ff }); // Розовый цвет
     const bullet = new THREE.Mesh(geometry, material);
 
