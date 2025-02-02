@@ -38,7 +38,7 @@ scene.add(backgroundPlane);
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = .15;
+player.position.z = -0.2;
 scene.add(player);
 
 // Начальная позиция камеры
