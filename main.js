@@ -21,13 +21,10 @@ player.position.z = 2;
 scene.add(player);
 
 // Фиксированная позиция камеры
-camera.position.set(0, 5, 10); // Камера находится выше и позади игрового поля
+camera.position.set(0, 1, 2); // Камера находится выше и позади игрового поля
 camera.lookAt(0, 0, 0); // Камера смотрит в центр (0, 0, 0)
 
-// Создаем плоскость (пол)
-const planeGeometry = new THREE.PlaneGeometry(20, 20); // Размеры плоскости
-const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 }); // Серый цвет
-const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
 
 plane.rotation.x = -Math.PI / 2; // Поворачиваем плоскость горизонтально
 scene.add(plane);
