@@ -28,7 +28,7 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide // Текстура видна с обеих сторон
 });
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-backgroundPlane.position.z = 0; // Плоскость находится позади всех объектов
+backgroundPlane.position.z = 20; // Плоскость находится позади всех объектов
 backgroundPlane.position.y = -70; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
 backgroundPlane.rotation.x = -60 * (Math.PI / 180); // Поворот на -30 градусов по оси X
 scene.add(backgroundPlane);
@@ -41,7 +41,7 @@ player.position.z = 0.2;
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, -3); // Камера ближе к игроку и выше
+camera.position.set(0, 2, 3); // Камера ближе к игроку и выше
 camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Счётчик убитых врагов
@@ -85,7 +85,7 @@ function createEnemy() {
 
     // Ограничиваем позицию врага по оси X
     enemy.position.x = Math.random() * 4 - 2; // Случайная позиция от -2 до 2
-    enemy.position.z = player.position.z + 20; // Враги появляются впереди игрока
+    enemy.position.z = -20; // Начинают далеко позади игрока
     scene.add(enemy);
     enemies.push(enemy);
 }
@@ -94,9 +94,10 @@ setInterval(createEnemy, 2000); // Добавляем врагов каждые 
 
 function moveEnemies() {
     enemies.forEach((enemy, index) => {
-        enemy.position.z -= 0.1; // Враги летят вперёд (к игроку)
+        enemy.position.z += 0.1; // Враги летят вперед
+
         // Удаляем врагов, которые прошли мимо игрока или вышли за границы
-        if (enemy.position.z < player.position.z - 5 || enemy.position.x < -2 || enemy.position.x > 2) {
+        if (enemy.position.z > 5 || enemy.position.x < -2 || enemy.position.x > 2) {
             scene.remove(enemy);
             enemies.splice(index, 1);
         }
@@ -111,7 +112,7 @@ function shoot() {
     const bullet = new THREE.Mesh(geometry, material);
 
     bullet.position.copy(player.position);
-    bullet.position.z += 0.5; // Пули летят вперёд от игрока
+    bullet.position.z -= 0.5; // Чуть впереди игрока
     scene.add(bullet);
     bullets.push(bullet);
 }
@@ -122,10 +123,10 @@ window.addEventListener('keydown', (event) => {
 
 function moveBullets() {
     bullets.forEach((bullet, index) => {
-        bullet.position.z += 0.5; // Пули летят вперёд
+        bullet.position.z -= 0.5; // Пули летят вперед
 
         // Удаляем пули, которые улетели далеко или вышли за границы
-        if (bullet.position.z > player.position.z + 20 || bullet.position.x < -5 || bullet.position.x > 5) {
+        if (bullet.position.z < -20 || bullet.position.x < -5 || bullet.position.x > 5) {
             scene.remove(bullet);
             bullets.splice(index, 1);
         }
@@ -187,10 +188,10 @@ function shootEnemyBullets() {
 
 function moveEnemyBullets() {
     enemyBullets.forEach((bullet, index) => {
-        bullet.position.z -= 0.3; // Пули летят назад (к игроку)
+        bullet.position.z += 0.3; // Пули летят вперёд
 
         // Удаляем пули, которые улетели далеко или вышли за границы
-        if (bullet.position.z < player.position.z - 10 || bullet.position.x < -5 || bullet.position.x > 5) {
+        if (bullet.position.z > 10 || bullet.position.x < -5 || bullet.position.x > 5) {
             scene.remove(bullet);
             enemyBullets.splice(index, 1);
         }
@@ -220,13 +221,7 @@ function updateCameraPosition() {
     camera.position.y = player.position.y + cameraOffsetY;
     camera.position.z = player.position.z + cameraOffsetZ;
 
-    // Направляем камеру вперёд от игрока
-    const lookAtPosition = new THREE.Vector3(
-        player.position.x,
-        player.position.y + cameraOffsetY,
-        player.position.z + 10 // Смотрим вперёд от игрока (в сторону врагов)
-    );
-    camera.lookAt(lookAtPosition);
+  //  camera.lookAt(player.position); // Камера смотрит на игрока
 }
 
 // Параллакс эффект через смещение плоскости
