@@ -14,7 +14,7 @@ light.position.set(0, 5, 5);
 scene.add(light);
 
 // Создаем куб (игрок)
-const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
 player.position.z = 1;
