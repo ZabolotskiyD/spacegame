@@ -17,38 +17,36 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 5, 5);
 scene.add(light);
 
+// Добавляем текстуру космоса на фон
+const textureLoader = new THREE.TextureLoader();
+textureLoader.load('https://i.imgur.com/8Gz9uJH.jpg', (texture) => {
+    scene.background = texture; // Устанавливаем текстуру как фон сцены
+});
+
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = 1;
+player.position.z = 0.5;
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, 5); // Камера ближе к игроку
+camera.position.set(0, 2, 2); // Камера ближе к игроку
 camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Управление игроком
 const keys = {};
 window.addEventListener('keydown', (event) => {
-    console.log(`Key pressed: ${event.key.toLowerCase()}`);
     keys[event.key.toLowerCase()] = true;
 });
 window.addEventListener('keyup', (event) => {
-    console.log(`Key released: ${event.key.toLowerCase()}`);
     keys[event.key.toLowerCase()] = false;
 });
 
 function movePlayer() {
     const speed = 0.1;
-    if (keys['a']) {
-        player.position.x = Math.max(player.position.x - speed, -2);
-        console.log(`Moving left: x = ${player.position.x}`);
-    }
-    if (keys['d']) {
-        player.position.x = Math.min(player.position.x + speed, 2);
-        console.log(`Moving right: x = ${player.position.x}`);
-    }
+    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -2); // Левая граница
+    if (keys['d']) player.position.x = Math.min(player.position.x + speed, 2);  // Правая граница
 }
 
 // Враги
@@ -58,7 +56,8 @@ function createEnemy() {
     const material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
     const enemy = new THREE.Mesh(geometry, material);
 
-    enemy.position.x = Math.random() * 6 - 3; // Случайная позиция по X
+    // Ограничиваем позицию врага по оси X
+    enemy.position.x = Math.random() * 4 - 2; // Случайная позиция от -2 до 2
     enemy.position.z = -20; // Начинают далеко позади игрока
     scene.add(enemy);
     enemies.push(enemy);
@@ -71,7 +70,7 @@ function moveEnemies() {
         enemy.position.z += 0.1; // Враги летят вперед
 
         // Удаляем врагов, которые прошли мимо игрока или вышли за границы
-        if (enemy.position.z > 5 || enemy.position.x < -5 || enemy.position.x > 5) {
+        if (enemy.position.z > 5 || enemy.position.x < -2 || enemy.position.x > 2) {
             scene.remove(enemy);
             enemies.splice(index, 1);
         }
