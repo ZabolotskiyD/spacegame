@@ -1,10 +1,8 @@
 import * as THREE from 'three';
 
-// Создаем сцену, камеру и рендерер
+// Создаем сцену и рендерер
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
-
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -13,24 +11,27 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 5, 5);
 scene.add(light);
 
+// Создаем ортографическую камеру
+const aspectRatio = window.innerWidth / window.innerHeight;
+const frustumSize = 10; // Размер видимой области
+const camera = new THREE.OrthographicCamera(
+    -frustumSize * aspectRatio / 2, // левая граница
+     frustumSize * aspectRatio / 2, // правая граница
+    frustumSize / 2,                // верхняя граница
+   -frustumSize / 2,                // нижняя граница
+    0.1,                            // ближняя плоскость отсечения
+    1000                             // дальняя плоскость отсечения
+);
+
+camera.position.set(0, 2, 5); // Позиция камеры
+camera.lookAt(0, 0, 0);       // Камера смотрит в центр
+
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
 player.position.z = 1;
 scene.add(player);
-
-// Фиксированная позиция камеры
-camera.position.set(0, 2, 3); // Камера находится выше и позади игрового поля
-camera.lookAt(0, 0, 0); // Камера смотрит в центр (0, 0, 0)
-
-// // Создаем плоскость (пол)
-// const planeGeometry = new THREE.PlaneGeometry(20, 20); // Размеры плоскости
-// const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 }); // Серый цвет
-// const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-
-// plane.rotation.x = -Math.PI / 2; // Поворачиваем плоскость горизонтально
-// scene.add(plane);
 
 // Управление игроком
 const keys = {};
@@ -197,7 +198,14 @@ animate();
 
 // Обновление размеров при изменении окна
 window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    const aspectRatio = window.innerWidth / window.innerHeight;
+
+    // Обновляем границы камеры
+    camera.left = -frustumSize * aspectRatio / 2;
+    camera.right = frustumSize * aspectRatio / 2;
+    camera.top = frustumSize / 2;
+    camera.bottom = -frustumSize / 2;
+
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
