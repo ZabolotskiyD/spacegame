@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -17,12 +17,20 @@ scene.add(light);
 const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = 0;
+player.position.z = 1;
 scene.add(player);
 
 // Фиксированная позиция камеры
-camera.position.set(0, 5, 10); // Камера находится выше и позади игрового поля
+camera.position.set(0, 2, 3); // Камера находится выше и позади игрового поля
 camera.lookAt(0, 0, 0); // Камера смотрит в центр (0, 0, 0)
+
+// // Создаем плоскость (пол)
+// const planeGeometry = new THREE.PlaneGeometry(20, 20); // Размеры плоскости
+// const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 }); // Серый цвет
+// const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+// plane.rotation.x = -Math.PI / 2; // Поворачиваем плоскость горизонтально
+// scene.add(plane);
 
 // Управление игроком
 const keys = {};
@@ -48,7 +56,7 @@ function createEnemy() {
 
     // Ограничиваем позицию врага по оси X
     enemy.position.x = Math.random() * 10 - 5; // Случайная позиция от -5 до 5
-    enemy.position.z = -10; // Начинают далеко позади игрока
+    enemy.position.z = -20; // Начинают далеко позади игрока
     scene.add(enemy);
     enemies.push(enemy);
 }
@@ -89,7 +97,7 @@ function moveBullets() {
         bullet.position.z -= 0.5; // Пули летят вперед
 
         // Удаляем пули, которые улетели далеко или вышли за границы
-        if (bullet.position.z < -10 || bullet.position.x < -5 || bullet.position.x > 5) {
+        if (bullet.position.z < -20 || bullet.position.x < -5 || bullet.position.x > 5) {
             scene.remove(bullet);
             bullets.splice(index, 1);
         }
