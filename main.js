@@ -41,7 +41,7 @@ player.position.z = 0.2;
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, -3); // Камера ближе к игроку и выше
+camera.position.set(0, 2, 3); // Камера ближе к игроку и выше
 camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Счётчик убитых врагов
