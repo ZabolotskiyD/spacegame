@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-    60, // Угол обзора (сохраняем перспективу)
+    60, // Угол обзора
     window.innerWidth / window.innerHeight,
     0.1,
     1000
@@ -31,16 +31,24 @@ camera.lookAt(player.position); // Камера смотрит на игрока
 // Управление игроком
 const keys = {};
 window.addEventListener('keydown', (event) => {
+    console.log(`Key pressed: ${event.key.toLowerCase()}`);
     keys[event.key.toLowerCase()] = true;
 });
 window.addEventListener('keyup', (event) => {
+    console.log(`Key released: ${event.key.toLowerCase()}`);
     keys[event.key.toLowerCase()] = false;
 });
 
 function movePlayer() {
     const speed = 0.1;
-    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -2); // Левая граница
-    if (keys['d']) player.position.x = Math.min(player.position.x + speed, 2);  // Правая граница
+    if (keys['a']) {
+        player.position.x = Math.max(player.position.x - speed, -2);
+        console.log(`Moving left: x = ${player.position.x}`);
+    }
+    if (keys['d']) {
+        player.position.x = Math.min(player.position.x + speed, 2);
+        console.log(`Moving right: x = ${player.position.x}`);
+    }
 }
 
 // Враги
@@ -184,7 +192,7 @@ function updateCameraPosition() {
 function animate() {
     requestAnimationFrame(animate);
 
-    movePlayer();
+    movePlayer(); // Двигаем игрока
     moveEnemies();
     moveBullets();
     moveEnemyBullets();
