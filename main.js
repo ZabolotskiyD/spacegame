@@ -31,7 +31,7 @@ const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 
 backgroundPlane.position.z = -30; // Плоскость находится позади всех объектов
 backgroundPlane.position.y = -50; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
-backgroundPlane.rotation.x = -30 * (Math.PI / 180); // Поворот на -30 градусов по оси X
+backgroundPlane.rotation.x = -60 * (Math.PI / 180); // Поворот на -30 градусов по оси X
 scene.add(backgroundPlane);
 
 // Создаем куб (игрок)
