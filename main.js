@@ -19,7 +19,7 @@ scene.add(light);
 
 // Добавляем текстуру космоса на фон
 const textureLoader = new THREE.TextureLoader();
-textureLoader.load('https://i.imgur.com/8Gz9uJH.jpg', (texture) => {
+textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg', (texture) => {
     scene.background = texture; // Устанавливаем текстуру как фон сцены
 });
 
