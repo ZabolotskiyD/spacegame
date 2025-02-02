@@ -22,7 +22,7 @@ const textureLoader = new THREE.TextureLoader();
 const backgroundTexture = textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg'); // Текстура фона
 
 // Создаем гигантскую плоскость для фона
-const backgroundGeometry = new THREE.PlaneGeometry(90, 90); // Увеличиваем размер плоскости
+const backgroundGeometry = new THREE.PlaneGeometry(100, 100); // Увеличиваем размер плоскости
 const backgroundMaterial = new THREE.MeshBasicMaterial({
     map: backgroundTexture,
     side: THREE.DoubleSide // Текстура видна с обеих сторон
@@ -30,8 +30,8 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 
 backgroundPlane.position.z = -30; // Плоскость находится позади всех объектов
-
-backgroundPlane.rotation.x = -30; // Небольшой наклон плоскости к камере
+backgroundPlane.position.y = -50; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
+backgroundPlane.rotation.x = -30 * (Math.PI / 180); // Поворот на -30 градусов по оси X
 scene.add(backgroundPlane);
 
 // Создаем куб (игрок)
