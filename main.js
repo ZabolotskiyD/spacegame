@@ -17,7 +17,7 @@ scene.add(light);
 const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = 2;
+player.position.z = 1;
 scene.add(player);
 
 // Позиция камеры
@@ -26,8 +26,8 @@ camera.position.set(0, 2, 5); // Камера немного выше и поз�
 // Функция для обновления позиции камеры
 function updateCameraPosition() {
     camera.position.x = player.position.x;
-    camera.position.z = player.position.z + 5; // Камера всегда позади игрока
-    camera.lookAt(player.position);
+    camera.position.z = player.position.z + 2; // Камера всегда позади игрока
+   // camera.lookAt(player.position);
 }
 
 // Управление игроком
@@ -37,6 +37,11 @@ window.addEventListener('keydown', (event) => {
 });
 window.addEventListener('keyup', (event) => {
     keys[event.key.toLowerCase()] = false;
+});
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
 function movePlayer() {
@@ -53,7 +58,7 @@ function createEnemy() {
     const enemy = new THREE.Mesh(geometry, material);
 
     enemy.position.x = Math.random() * 6 - 3; // Случайная позиция по X
-    enemy.position.z = -10; // Начинают далеко позади игрока
+    enemy.position.z = -20; // Начинают далеко позади игрока
     scene.add(enemy);
     enemies.push(enemy);
 }
