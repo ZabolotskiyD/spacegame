@@ -205,7 +205,7 @@ function checkEnemyBulletCollisions() {
 function updateCameraPosition() {
     const cameraOffsetX = 0; // Камера не смещается по X относительно игрока
     const cameraOffsetY = 2; // Камера находится выше игрока (например, на 2 единицы)
-    const cameraOffsetZ = -5; // Камера находится сзади игрока
+    const cameraOffsetZ = 5; // Камера находится сзади игрока
 
     // Позиция камеры
     camera.position.x = player.position.x + cameraOffsetX;
