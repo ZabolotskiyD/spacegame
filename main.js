@@ -28,7 +28,7 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide // Текстура видна с обеих сторон
 });
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-backgroundPlane.position.z = 20; // Плоскость находится позади всех объектов
+backgroundPlane.position.z = 50; // Плоскость находится позади всех объектов
 backgroundPlane.position.y = -70; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
 backgroundPlane.rotation.x = -60 * (Math.PI / 180); // Поворот на -60 градусов по оси X
 scene.add(backgroundPlane);
@@ -215,7 +215,7 @@ function updateCameraPosition() {
     // Направление камеры (смотрит вперед и немного вниз)
     const lookAtPosition = new THREE.Vector3(
         player.position.x, // Камера смотрит вперед по X
-        player.position.y - 1, // Камера смотрит немного вниз по Y
+        player.position.y + 1, // Камера смотрит немного вниз по Y
         player.position.z - 10 // Камера смотрит вперед по Z
     );
 
