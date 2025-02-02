@@ -27,14 +27,13 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture 
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 
 backgroundPlane.position.z = -30; // Плоскость находится позади всех объектов
-backgroundPlane.rotation.x = 60; // Плоскость находится позади всех объектов
 scene.add(backgroundPlane);
 
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = 1;
+player.position.z = .2;
 scene.add(player);
 
 // Начальная позиция камеры
