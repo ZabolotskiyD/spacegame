@@ -41,7 +41,7 @@ player.position.z = 2;
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, 5); // Камера выше и сзади игрока
+camera.position.set(0, .5, 1); // Камера выше и сзади игрока
 camera.lookAt(new THREE.Vector3(0, 0, -10)); // Камера смотрит вперед
 
 // Счётчик убитых врагов
