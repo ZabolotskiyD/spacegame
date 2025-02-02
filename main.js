@@ -19,9 +19,15 @@ scene.add(light);
 
 // Загружаем текстуру для фона
 const textureLoader = new THREE.TextureLoader();
-textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg', (texture) => {
-    scene.background = texture; // Устанавливаем текстуру как фон сцены
-});
+const backgroundTexture = textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg'); // Текстура фона
+
+// Создаем гигантскую плоскость для фона
+const backgroundGeometry = new THREE.PlaneGeometry(40, 40); // Размеры плоскости
+const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture });
+const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+
+backgroundPlane.position.z = -30; // Плоскость находится позади всех объектов
+scene.add(backgroundPlane);
 
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -203,10 +209,15 @@ function checkEnemyBulletCollisions() {
 
 // Функция для обновления позиции камеры
 function updateCameraPosition() {
-    const parallaxFactor = 0.2; // Коэффициент параллакса (меньше = медленнее движение)
-    camera.position.x = player.position.x * parallaxFactor; // Камера немного смещается за игроком
+    camera.position.x = player.position.x; // Камера следует за игроком по X
     camera.position.z = player.position.z + 5; // Камера остаётся позади игрока
     camera.lookAt(player.position); // Камера смотрит на игрока
+}
+
+// Параллакс эффект через смещение плоскости
+function updateParallax() {
+    const parallaxFactor = 0.1; // Коэффициент параллакса (меньше = медленнее движение)
+    backgroundPlane.position.x = player.position.x * parallaxFactor; // Смещаем фон
 }
 
 // Основной игровой цикл
@@ -223,6 +234,7 @@ function animate() {
     checkEnemyBulletCollisions();
 
     updateCameraPosition(); // Обновляем позицию камеры
+    updateParallax(); // Обновляем параллакс эффект
 
     renderer.render(scene, camera);
 }
