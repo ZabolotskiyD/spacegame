@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -17,11 +17,11 @@ scene.add(light);
 const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = 2;
+player.position.z = 0;
 scene.add(player);
 
 // Фиксированная позиция камеры
-camera.position.set(0, 1, 2); // Камера находится выше и позади игрового поля
+camera.position.set(0, 5, 10); // Камера находится выше и позади игрового поля
 camera.lookAt(0, 0, 0); // Камера смотрит в центр (0, 0, 0)
 
 // Управление игроком
