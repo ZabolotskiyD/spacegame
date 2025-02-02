@@ -17,23 +17,11 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 5, 5);
 scene.add(light);
 
-// Загружаем текстуры для параллакса
+// Загружаем текстуру для фона
 const textureLoader = new THREE.TextureLoader();
-const backgroundTexture = textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg'); // Дальний фон
-const foregroundTexture = textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg'); // Ближний фон
-
-// Создаем материалы для параллакса
-const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture });
-const foregroundMaterial = new THREE.MeshBasicMaterial({ map: foregroundTexture });
-
-// Создаем плоскости для фона
-const backgroundPlane = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), backgroundMaterial);
-backgroundPlane.position.z = -10; // Дальний фон
-scene.add(backgroundPlane);
-
-const foregroundPlane = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), foregroundMaterial);
-foregroundPlane.position.z = -5; // Ближний фон
-scene.add(foregroundPlane);
+textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg', (texture) => {
+    scene.background = texture; // Устанавливаем текстуру как фон сцены
+});
 
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -215,22 +203,10 @@ function checkEnemyBulletCollisions() {
 
 // Функция для обновления позиции камеры
 function updateCameraPosition() {
-    camera.position.x = player.position.x; // Камера следует за игроком по X
+    const parallaxFactor = 0.2; // Коэффициент параллакса (меньше = медленнее движение)
+    camera.position.x = player.position.x * parallaxFactor; // Камера немного смещается за игроком
     camera.position.z = player.position.z + 5; // Камера остаётся позади игрока
     camera.lookAt(player.position); // Камера смотрит на игрока
-}
-
-// Параллакс эффект
-function updateParallax() {
-    const playerX = player.position.x;
-
-    // Движение дальнего фона
-    backgroundPlane.position.x = playerX * 0.1; // Медленное движение
-    backgroundPlane.material.map.offset.x = playerX * 0.001;
-
-    // Движение ближнего фона
-    foregroundPlane.position.x = playerX * 0.3; // Быстрее, чем дальний фон
-    foregroundPlane.material.map.offset.x = playerX * 0.003;
 }
 
 // Основной игровой цикл
@@ -247,7 +223,6 @@ function animate() {
     checkEnemyBulletCollisions();
 
     updateCameraPosition(); // Обновляем позицию камеры
-    updateParallax(); // Обновляем параллакс эффект
 
     renderer.render(scene, camera);
 }
