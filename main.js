@@ -17,22 +17,51 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 5, 5);
 scene.add(light);
 
-// Добавляем текстуру космоса на фон
+// Загружаем текстуры для параллакса
 const textureLoader = new THREE.TextureLoader();
-textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg', (texture) => {
-    scene.background = texture; // Устанавливаем текстуру как фон сцены
-});
+const backgroundTexture = textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg'); // Дальний фон
+const foregroundTexture = textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg'); // Ближний фон
+
+// Создаем материалы для параллакса
+const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture });
+const foregroundMaterial = new THREE.MeshBasicMaterial({ map: foregroundTexture });
+
+// Создаем плоскости для фона
+const backgroundPlane = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), backgroundMaterial);
+backgroundPlane.position.z = -10; // Дальний фон
+scene.add(backgroundPlane);
+
+const foregroundPlane = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), foregroundMaterial);
+foregroundPlane.position.z = -5; // Ближний фон
+scene.add(foregroundPlane);
 
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = 0.5;
+player.position.z = 1;
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, 2); // Камера ближе к игроку
+camera.position.set(0, 2, 5); // Камера ближе к игроку
 camera.lookAt(player.position); // Камера смотрит на игрока
+
+// Счётчик убитых врагов
+let killedEnemies = 0;
+const scoreElement = document.createElement('div');
+scoreElement.style.position = 'absolute';
+scoreElement.style.top = '10px';
+scoreElement.style.right = '10px';
+scoreElement.style.color = 'white';
+scoreElement.style.fontFamily = 'Arial, sans-serif';
+scoreElement.style.fontSize = '20px';
+scoreElement.innerHTML = `Killed: ${killedEnemies}`;
+document.body.appendChild(scoreElement);
+
+// Обновление счётчика
+function updateScore() {
+    scoreElement.innerHTML = `Killed: ${killedEnemies}`;
+}
 
 // Управление игроком
 const keys = {};
@@ -116,6 +145,10 @@ function checkCollisions() {
                 scene.remove(enemy);
                 bullets.splice(bulletIndex, 1);
                 enemies.splice(enemyIndex, 1);
+
+                // Увеличиваем счётчик убитых врагов
+                killedEnemies++;
+                updateScore();
             }
         });
     });
@@ -187,6 +220,19 @@ function updateCameraPosition() {
     camera.lookAt(player.position); // Камера смотрит на игрока
 }
 
+// Параллакс эффект
+function updateParallax() {
+    const playerX = player.position.x;
+
+    // Движение дальнего фона
+    backgroundPlane.position.x = playerX * 0.1; // Медленное движение
+    backgroundPlane.material.map.offset.x = playerX * 0.001;
+
+    // Движение ближнего фона
+    foregroundPlane.position.x = playerX * 0.3; // Быстрее, чем дальний фон
+    foregroundPlane.material.map.offset.x = playerX * 0.003;
+}
+
 // Основной игровой цикл
 function animate() {
     requestAnimationFrame(animate);
@@ -201,6 +247,7 @@ function animate() {
     checkEnemyBulletCollisions();
 
     updateCameraPosition(); // Обновляем позицию камеры
+    updateParallax(); // Обновляем параллакс эффект
 
     renderer.render(scene, camera);
 }
