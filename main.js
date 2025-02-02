@@ -29,8 +29,8 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({
 });
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 
-backgroundPlane.position.z = -10; // Плоскость находится позади всех объектов
-backgroundPlane.position.y = -50; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
+backgroundPlane.position.z = 0; // Плоскость находится позади всех объектов
+backgroundPlane.position.y = -30; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
 backgroundPlane.rotation.x = -60 * (Math.PI / 180); // Поворот на -30 градусов по оси X
 scene.add(backgroundPlane);
 
@@ -38,7 +38,7 @@ scene.add(backgroundPlane);
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = 1;
+player.position.z = .15;
 scene.add(player);
 
 // Начальная позиция камеры
