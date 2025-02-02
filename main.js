@@ -24,11 +24,6 @@ scene.add(player);
 camera.position.set(0, 1, 2); // Камера находится выше и позади игрового поля
 camera.lookAt(0, 0, 0); // Камера смотрит в центр (0, 0, 0)
 
-
-
-plane.rotation.x = -Math.PI / 2; // Поворачиваем плоскость горизонтально
-scene.add(plane);
-
 // Управление игроком
 const keys = {};
 window.addEventListener('keydown', (event) => {
