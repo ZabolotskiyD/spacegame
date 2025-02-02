@@ -215,7 +215,7 @@ function updateCameraPosition() {
     // Направление камеры (смотрит вперед и немного вниз)
     const lookAtPosition = new THREE.Vector3(
         player.position.x, // Камера смотрит вперед по X
-        player.position.y -3, // Камера смотрит немного вниз по Y
+        player.position.y +3, // Камера смотрит немного вниз по Y
         player.position.z - 10 // Камера смотрит вперед по Z
     );
 
