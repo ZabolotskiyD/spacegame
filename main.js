@@ -37,7 +37,7 @@ scene.add(backgroundPlane);
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.set(0, 1, 2); // Поднимаем игрока на 1 единицу по оси Y
+player.position.set(0, 0, 5); 
 scene.add(player);
 
 // Начальная позиция камеры
