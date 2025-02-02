@@ -203,16 +203,26 @@ function checkEnemyBulletCollisions() {
 
 // Функция для обновления позиции камеры
 function updateCameraPosition() {
-    const cameraOffsetX = 0;
-    const cameraOffsetY = 2;
-    const cameraOffsetZ = -5;
+    const cameraOffsetX = 0; // Камера не смещается по X относительно игрока
+    const cameraOffsetY = 2; // Камера находится выше игрока (например, на 2 единицы)
+    const cameraOffsetZ = -5; // Камера находится сзади игрока
 
+    // Позиция камеры
     camera.position.x = player.position.x + cameraOffsetX;
     camera.position.y = player.position.y + cameraOffsetY;
     camera.position.z = player.position.z + cameraOffsetZ;
 
-    camera.lookAt(player.position); // Камера всегда смотрит на игрока
+    // Направление камеры (смотрит вперед и немного вниз)
+    const lookAtPosition = new THREE.Vector3(
+        player.position.x, // Камера смотрит вперед по X
+        player.position.y + 1, // Камера смотрит немного вниз по Y (например, на 1 единицу выше игрока)
+        player.position.z - 10 // Камера смотрит вперед по Z
+    );
+
+    camera.lookAt(lookAtPosition); // Камера смотрит вперед и немного вниз
 }
+
+
 
 // Параллакс эффект через смещение плоскости
 function updateParallax() {
