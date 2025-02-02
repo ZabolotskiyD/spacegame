@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-    60, // Угол обзора (меньше = меньше искажений)
+    60, // Угол обзора (сохраняем перспективу)
     window.innerWidth / window.innerHeight,
     0.1,
     1000
@@ -25,7 +25,7 @@ player.position.z = 1;
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 3, 8); // Камера выше и дальше от игрока
+camera.position.set(0, 2, 5); // Камера ближе к игроку
 camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Управление игроком
@@ -39,8 +39,8 @@ window.addEventListener('keyup', (event) => {
 
 function movePlayer() {
     const speed = 0.1;
-    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -3); // Левая граница
-    if (keys['d']) player.position.x = Math.min(player.position.x + speed, 3);  // Правая граница
+    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -2); // Левая граница
+    if (keys['d']) player.position.x = Math.min(player.position.x + speed, 2);  // Правая граница
 }
 
 // Враги
@@ -176,7 +176,7 @@ function checkEnemyBulletCollisions() {
 // Функция для обновления позиции камеры
 function updateCameraPosition() {
     camera.position.x = player.position.x; // Камера следует за игроком по X
-    camera.position.z = player.position.z + 8; // Камера остаётся позади игрока
+    camera.position.z = player.position.z + 5; // Камера остаётся позади игрока
     camera.lookAt(player.position); // Камера смотрит на игрока
 }
 
