@@ -221,7 +221,7 @@ function updateCameraPosition() {
     camera.position.y = player.position.y + cameraOffsetY;
     camera.position.z = player.position.z + cameraOffsetZ;
 
-    camera.lookAt(player.position); // Камера смотрит на игрока
+  //  camera.lookAt(player.position); // Камера смотрит на игрока
 }
 
 // Параллакс эффект через смещение плоскости
