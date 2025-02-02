@@ -27,6 +27,7 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture 
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 
 backgroundPlane.position.z = -30; // Плоскость находится позади всех объектов
+backgroundPlane.rotation.x = Math.PI / 6; // Небольшой наклон плоскости к камере
 scene.add(backgroundPlane);
 
 // Создаем куб (игрок)
