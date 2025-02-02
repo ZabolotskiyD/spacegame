@@ -37,7 +37,7 @@ scene.add(backgroundPlane);
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = 0.2;
+player.position.z = 2;
 scene.add(player);
 
 // Начальная позиция камеры
@@ -83,7 +83,7 @@ function createEnemy() {
     const material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
     const enemy = new THREE.Mesh(geometry, material);
     enemy.position.x = Math.random() * 4 - 2; // Случайная позиция от -2 до 2
-    enemy.position.z = -20; // Начинают далеко позади игрока
+    enemy.position.z = -40; // Начинают далеко позади игрока
     scene.add(enemy);
     enemies.push(enemy);
 }
@@ -119,7 +119,7 @@ function moveBullets() {
     bullets.forEach((bullet, index) => {
         bullet.position.z -= 0.5; // Пули летят вперед
         // Удаляем пули, которые улетели далеко или вышли за границы
-        if (bullet.position.z < -20 || bullet.position.x < -5 || bullet.position.x > 5) {
+        if (bullet.position.z < -40 || bullet.position.x < -5 || bullet.position.x > 5) {
             scene.remove(bullet);
             bullets.splice(index, 1);
         }
@@ -215,7 +215,7 @@ function updateCameraPosition() {
     // Направление камеры (смотрит вперед и немного вниз)
     const lookAtPosition = new THREE.Vector3(
         player.position.x, // Камера смотрит вперед по X
-        player.position.y + 1, // Камера смотрит немного вниз по Y
+        player.position.y + 10, // Камера смотрит немного вниз по Y
         player.position.z - 10 // Камера смотрит вперед по Z
     );
 
