@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-    45, // Угол обзора
+    60, // Угол обзора
     window.innerWidth / window.innerHeight,
     0.1,
     1000
@@ -42,7 +42,7 @@ player.position.z = -0.2;
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, 2); // Камера ближе к игроку
+camera.position.set(0, 2, .5); // Камера ближе к игроку
 camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Счётчик убитых врагов
