@@ -29,19 +29,19 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({
 });
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 backgroundPlane.position.z = 50; // Плоскость находится позади всех объектов
-backgroundPlane.position.y = -70; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
-backgroundPlane.rotation.x = -60 * (Math.PI / 180); // Поворот на -60 градусов по оси X
+backgroundPlane.position.y = 0; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
+backgroundPlane.rotation.x = -30 * (Math.PI / 180); // Поворот на -60 градусов по оси X
 scene.add(backgroundPlane);
 
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = 2;
+player.position.set(0, 1, 2); // Поднимаем игрока на 1 единицу по оси Y
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, .5, 1); // Камера выше и сзади игрока
+camera.position.set(0, 2, 1); // Камера выше и сзади игрока
 camera.lookAt(new THREE.Vector3(0, 0, -10)); // Камера смотрит вперед
 
 // Счётчик убитых врагов
@@ -204,7 +204,7 @@ function checkEnemyBulletCollisions() {
 // Функция для обновления позиции камеры
 function updateCameraPosition() {
     const cameraOffsetX = 0; // Камера не смещается по X относительно игрока
-    const cameraOffsetY = .5; // Камера находится выше игрока
+    const cameraOffsetY = 2; // Камера находится выше игрока (например, на 2 единицы)
     const cameraOffsetZ = -5; // Камера находится сзади игрока
 
     // Позиция камеры
@@ -215,7 +215,7 @@ function updateCameraPosition() {
     // Направление камеры (смотрит вперед и немного вниз)
     const lookAtPosition = new THREE.Vector3(
         player.position.x, // Камера смотрит вперед по X
-        player.position.y + 3, // Камера смотрит немного вниз по Y
+        player.position.y + 1, // Камера смотрит немного вниз по Y (например, на 1 единицу выше игрока)
         player.position.z - 10 // Камера смотрит вперед по Z
     );
 
