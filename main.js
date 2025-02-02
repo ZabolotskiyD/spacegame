@@ -37,12 +37,12 @@ scene.add(backgroundPlane);
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.set(0, 0, 5); 
+player.position.set(0, 0, 0); // Игрок в начале координат
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, 1); // Камера выше и сзади игрока
-camera.lookAt(new THREE.Vector3(0, 0, -10)); // Камера смотрит вперед
+camera.position.set(0, 2, 5); // Камера выше и сзади игрока
+camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Счётчик убитых врагов
 let killedEnemies = 0;
@@ -203,23 +203,15 @@ function checkEnemyBulletCollisions() {
 
 // Функция для обновления позиции камеры
 function updateCameraPosition() {
-    const cameraOffsetX = 0; // Камера не смещается по X относительно игрока
-    const cameraOffsetY = 2; // Камера находится выше игрока (например, на 2 единицы)
-    const cameraOffsetZ = -5; // Камера находится сзади игрока
+    const cameraOffsetX = 0;
+    const cameraOffsetY = 2;
+    const cameraOffsetZ = -5;
 
-    // Позиция камеры
     camera.position.x = player.position.x + cameraOffsetX;
     camera.position.y = player.position.y + cameraOffsetY;
     camera.position.z = player.position.z + cameraOffsetZ;
 
-    // Направление камеры (смотрит вперед и немного вниз)
-    const lookAtPosition = new THREE.Vector3(
-        player.position.x, // Камера смотрит вперед по X
-        player.position.y + 1, // Камера смотрит немного вниз по Y (например, на 1 единицу выше игрока)
-        player.position.z - 10 // Камера смотрит вперед по Z
-    );
-
-    camera.lookAt(lookAtPosition); // Камера смотрит вперед и немного вниз
+    camera.lookAt(player.position); // Камера всегда смотрит на игрока
 }
 
 // Параллакс эффект через смещение плоскости
