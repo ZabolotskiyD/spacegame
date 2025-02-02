@@ -30,7 +30,7 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 
 backgroundPlane.position.z = 0; // Плоскость находится позади всех объектов
-backgroundPlane.position.y = -30; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
+backgroundPlane.position.y = -70; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
 backgroundPlane.rotation.x = -60 * (Math.PI / 180); // Поворот на -30 градусов по оси X
 scene.add(backgroundPlane);
 
@@ -42,7 +42,7 @@ player.position.z = -0.2;
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, 5); // Камера ближе к игроку
+camera.position.set(0, 2, 2); // Камера ближе к игроку
 camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Счётчик убитых врагов
