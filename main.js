@@ -24,8 +24,11 @@ scene.add(player);
 camera.position.set(0, 1, 2); // Камера находится выше и позади игрового поля
 camera.lookAt(0, 0, 0); // Камера смотрит в центр (0, 0, 0)
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> dec2b0bfe7320df4ecad76ad7fa7d4afd7a334da
 // Управление игроком
 const keys = {};
 window.addEventListener('keydown', (event) => {
