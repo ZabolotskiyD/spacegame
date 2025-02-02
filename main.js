@@ -28,8 +28,7 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide // Текстура видна с обеих сторон
 });
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-
-backgroundPlane.position.z = 0; // Плоскость находится позади всех объектов
+backgroundPlane.position.z = 20; // Плоскость находится позади всех объектов
 backgroundPlane.position.y = -70; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
 backgroundPlane.rotation.x = -60 * (Math.PI / 180); // Поворот на -30 градусов по оси X
 scene.add(backgroundPlane);
@@ -42,7 +41,7 @@ player.position.z = -0.2;
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, .5); // Камера ближе к игроку
+camera.position.set(0, 2, -3); // Камера ближе к игроку и выше
 camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Счётчик убитых врагов
@@ -214,8 +213,14 @@ function checkEnemyBulletCollisions() {
 
 // Функция для обновления позиции камеры
 function updateCameraPosition() {
-    camera.position.x = player.position.x; // Камера следует за игроком по X
-    camera.position.z = player.position.z + 5; // Камера остаётся позади игрока
+    const cameraOffsetX = 0; // Камера следует за игроком по X
+    const cameraOffsetY = 1.5; // Камера находится выше игрока (на уровне "головы")
+    const cameraOffsetZ = -3; // Камера находится сзади игрока
+
+    camera.position.x = player.position.x + cameraOffsetX;
+    camera.position.y = player.position.y + cameraOffsetY;
+    camera.position.z = player.position.z + cameraOffsetZ;
+
     camera.lookAt(player.position); // Камера смотрит на игрока
 }
 
