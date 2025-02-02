@@ -28,7 +28,7 @@ const backgroundMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide // Текстура видна с обеих сторон
 });
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-backgroundPlane.position.z = 20; // Плоскость находится позади всех объектов
+backgroundPlane.position.z = 0; // Плоскость находится позади всех объектов
 backgroundPlane.position.y = -70; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
 backgroundPlane.rotation.x = -60 * (Math.PI / 180); // Поворот на -30 градусов по оси X
 scene.add(backgroundPlane);
@@ -85,7 +85,7 @@ function createEnemy() {
 
     // Ограничиваем позицию врага по оси X
     enemy.position.x = Math.random() * 4 - 2; // Случайная позиция от -2 до 2
-    enemy.position.z = -20; // Начинают далеко позади игрока
+    enemy.position.z = player.position.z + 20; // Враги появляются впереди игрока
     scene.add(enemy);
     enemies.push(enemy);
 }
@@ -94,10 +94,9 @@ setInterval(createEnemy, 2000); // Добавляем врагов каждые 
 
 function moveEnemies() {
     enemies.forEach((enemy, index) => {
-        enemy.position.z += 0.1; // Враги летят вперед
-
+        enemy.position.z -= 0.1; // Враги летят вперёд (к игроку)
         // Удаляем врагов, которые прошли мимо игрока или вышли за границы
-        if (enemy.position.z > 5 || enemy.position.x < -2 || enemy.position.x > 2) {
+        if (enemy.position.z < player.position.z - 5 || enemy.position.x < -2 || enemy.position.x > 2) {
             scene.remove(enemy);
             enemies.splice(index, 1);
         }
@@ -112,7 +111,7 @@ function shoot() {
     const bullet = new THREE.Mesh(geometry, material);
 
     bullet.position.copy(player.position);
-    bullet.position.z -= 0.5; // Чуть впереди игрока
+    bullet.position.z += 0.5; // Пули летят вперёд от игрока
     scene.add(bullet);
     bullets.push(bullet);
 }
@@ -123,10 +122,10 @@ window.addEventListener('keydown', (event) => {
 
 function moveBullets() {
     bullets.forEach((bullet, index) => {
-        bullet.position.z -= 0.5; // Пули летят вперед
+        bullet.position.z += 0.5; // Пули летят вперёд
 
         // Удаляем пули, которые улетели далеко или вышли за границы
-        if (bullet.position.z < -20 || bullet.position.x < -5 || bullet.position.x > 5) {
+        if (bullet.position.z > player.position.z + 20 || bullet.position.x < -5 || bullet.position.x > 5) {
             scene.remove(bullet);
             bullets.splice(index, 1);
         }
@@ -188,10 +187,10 @@ function shootEnemyBullets() {
 
 function moveEnemyBullets() {
     enemyBullets.forEach((bullet, index) => {
-        bullet.position.z += 0.3; // Пули летят вперёд
+        bullet.position.z -= 0.3; // Пули летят вперёд
 
         // Удаляем пули, которые улетели далеко или вышли за границы
-        if (bullet.position.z > 10 || bullet.position.x < -5 || bullet.position.x > 5) {
+        if (bullet.position.z < player.position.z - 10 || bullet.position.x < -5 || bullet.position.x > 5) {
             scene.remove(bullet);
             enemyBullets.splice(index, 1);
         }
