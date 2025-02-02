@@ -22,19 +22,23 @@ const textureLoader = new THREE.TextureLoader();
 const backgroundTexture = textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg'); // Текстура фона
 
 // Создаем гигантскую плоскость для фона
-const backgroundGeometry = new THREE.PlaneGeometry(100, 100); // Размеры плоскости
-const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture });
+const backgroundGeometry = new THREE.PlaneGeometry(100, 100); // Увеличиваем размер плоскости
+const backgroundMaterial = new THREE.MeshBasicMaterial({
+    map: backgroundTexture,
+    side: THREE.DoubleSide // Текстура видна с обеих сторон
+});
 const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 
 backgroundPlane.position.z = -30; // Плоскость находится позади всех объектов
-backgroundPlane.rotation.x = Math.PI / 4; // Небольшой наклон плоскости к камере
+backgroundPlane.position.y = -50; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
+backgroundPlane.rotation.x = Math.PI / 6; // Небольшой наклон плоскости к камере
 scene.add(backgroundPlane);
 
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.z = .2;
+player.position.z = 1;
 scene.add(player);
 
 // Начальная позиция камеры
@@ -45,8 +49,8 @@ camera.lookAt(player.position); // Камера смотрит на игрока
 let killedEnemies = 0;
 const scoreElement = document.createElement('div');
 scoreElement.style.position = 'absolute';
-scoreElement.style.top = '10px';
-scoreElement.style.right = '10px';
+scoreElement.style.bottom = '20px'; // Перемещаем счётчик вниз экрана
+scoreElement.style.right = '20px';
 scoreElement.style.color = 'white';
 scoreElement.style.fontFamily = 'Arial, sans-serif';
 scoreElement.style.fontSize = '20px';
