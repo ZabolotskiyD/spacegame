@@ -221,7 +221,16 @@ function updateCameraPosition() {
     camera.position.y = player.position.y + cameraOffsetY;
     camera.position.z = player.position.z + cameraOffsetZ;
 
-    camera.lookAt(player.position); // Камера смотрит на игрока
+    // Поворачиваем камеру на 180 градусов вокруг оси Y
+    camera.rotation.y = Math.PI;
+
+    // Направляем камеру вперёд от игрока
+    const lookAtPosition = new THREE.Vector3(
+        player.position.x,
+        player.position.y + cameraOffsetY,
+        player.position.z + 10 // Смотрим вперёд от игрока
+    );
+    camera.lookAt(lookAtPosition);
 }
 
 // Параллакс эффект через смещение плоскости
