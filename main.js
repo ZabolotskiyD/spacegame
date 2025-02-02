@@ -41,7 +41,7 @@ player.position.set(0, 0, 0); // Игрок в начале координат
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, -2); // Камера выше и сзади игрока
+//camera.position.set(0, 2, -2); // Камера выше и сзади игрока
 //camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Счётчик убитых врагов
@@ -212,14 +212,14 @@ function updateCameraPosition() {
     camera.position.y = player.position.y + cameraOffsetY;
     camera.position.z = player.position.z + cameraOffsetZ;
 
-    // Направление камеры (смотрит вперед и немного вниз)
-    const lookAtPosition = new THREE.Vector3(
-        player.position.x, // Камера смотрит вперед по X
-        player.position.y + 1, // Камера смотрит немного вниз по Y (например, на 1 единицу выше игрока)
-        player.position.z - 10 // Камера смотрит вперед по Z
-    );
+    // // Направление камеры (смотрит вперед и немного вниз)
+    // const lookAtPosition = new THREE.Vector3(
+    //     player.position.x, // Камера смотрит вперед по X
+    //     player.position.y + 1, // Камера смотрит немного вниз по Y (например, на 1 единицу выше игрока)
+    //     player.position.z - 10 // Камера смотрит вперед по Z
+    // );
 
-    camera.lookAt(lookAtPosition); // Камера смотрит вперед и немного вниз
+    // camera.lookAt(lookAtPosition); // Камера смотрит вперед и немного вниз
 }
 
 
