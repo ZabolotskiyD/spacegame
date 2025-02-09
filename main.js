@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'; // Импортируем RGBELoader
 
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
@@ -8,8 +9,10 @@ const camera = new THREE.PerspectiveCamera(
     0.1,
     1000
 );
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; // Включаем тональное отображение для HDR
+renderer.toneMappingExposure = 1; // Настройка экспозиции
 document.body.appendChild(renderer.domElement);
 
 // Добавляем освещение
@@ -17,21 +20,13 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 5, 5);
 scene.add(light);
 
-// Загружаем текстуру для фона
-const textureLoader = new THREE.TextureLoader();
-const backgroundTexture = textureLoader.load('https://rawcdn.githack.com/ZabolotskiyD/spacegame/763a0342327e0cfc18659571b3afe1609f3025be/2c915b54-f35e-4987-8f33-fc6873a77b7b%20(1).jpg'); // Текстура фона
-
-// Создаем гигантскую плоскость для фона
-const backgroundGeometry = new THREE.PlaneGeometry(200, 200); // Увеличиваем размер плоскости
-const backgroundMaterial = new THREE.MeshBasicMaterial({
-    map: backgroundTexture,
-    side: THREE.DoubleSide // Текстура видна с обеих сторон
+// Загружаем HDR-текстуру для фона
+const rgbeLoader = new RGBELoader();
+rgbeLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/equirectangular/venice_sunset_1k.hdr', (texture) => {
+    texture.mapping = THREE.EquirectangularReflectionMapping; // Устанавливаем тип отображения
+    scene.background = texture; // Устанавливаем текстуру как фон сцены
+    scene.environment = texture; // Используем ту же текстуру для окружения
 });
-const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-backgroundPlane.position.z = 50; // Плоскость находится позади всех объектов
-backgroundPlane.position.y = 0; // Смещаем плоскость вниз, чтобы её центр совпадал с центром экрана
-backgroundPlane.rotation.x = -30 * (Math.PI / 180); // Поворот на -60 градусов по оси X
-scene.add(backgroundPlane);
 
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -41,8 +36,8 @@ player.position.set(0, 0, 0); // Игрок в начале координат
 scene.add(player);
 
 // Начальная позиция камеры
-//camera.position.set(0, 2, -2); // Камера выше и сзади игрока
-//camera.lookAt(player.position); // Камера смотрит на игрока
+camera.position.set(0, 2, 5); // Камера выше и сзади игрока
+camera.lookAt(player.position); // Камера смотрит на игрока
 
 // Счётчик убитых врагов
 let killedEnemies = 0;
@@ -211,23 +206,6 @@ function updateCameraPosition() {
     camera.position.x = player.position.x + cameraOffsetX;
     camera.position.y = player.position.y + cameraOffsetY;
     camera.position.z = player.position.z + cameraOffsetZ;
-
-    // // Направление камеры (смотрит вперед и немного вниз)
-    // const lookAtPosition = new THREE.Vector3(
-    //     player.position.x, // Камера смотрит вперед по X
-    //     player.position.y + 1, // Камера смотрит немного вниз по Y (например, на 1 единицу выше игрока)
-    //     player.position.z - 10 // Камера смотрит вперед по Z
-    // );
-
-    // camera.lookAt(lookAtPosition); // Камера смотрит вперед и немного вниз
-}
-
-
-
-// Параллакс эффект через смещение плоскости
-function updateParallax() {
-    const parallaxFactor = 0.1; // Коэффициент параллакса (меньше = медленнее движение)
-    backgroundPlane.position.x = player.position.x * parallaxFactor; // Смещаем фон
 }
 
 // Основной игровой цикл
@@ -242,7 +220,6 @@ function animate() {
     checkPlayerCollisions();
     checkEnemyBulletCollisions();
     updateCameraPosition(); // Обновляем позицию камеры
-    updateParallax(); // Обновляем параллакс эффект
     renderer.render(scene, camera);
 }
 animate();
