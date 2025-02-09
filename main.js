@@ -31,21 +31,26 @@ const rgbeLoader = new RGBELoader();
 rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@b884c7b6b1c9352ace5d3c8e7d17b0ca2a480615/public/sci-fi.hdr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     hdrTexture = texture;
+
+    // Создаем сферу для отображения HDR-текстуры
+    const sphereMaterial = new THREE.MeshBasicMaterial({
+        map: hdrTexture,
+        side: THREE.BackSide
+    });
+    const sphereGeometry = new THREE.SphereBufferGeometry(500, 64, 32);
+    const skybox = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    scene.add(skybox);
+
     updateHDROrientation(); // Применяем начальную ориентацию после загрузки текстуры
 });
 
 // Функция для обновления ориентации HDR
 function updateHDROrientation() {
-    if (!hdrTexture) return;
+    const skybox = scene.getObjectByProperty('type', 'Mesh'); // Находим сферу в сцене
+    if (!skybox) return;
 
-    // Создаем матрицу вращения для HDR-текстуры
-    const euler = new THREE.Euler(rotationX, rotationY, rotationZ, 'XYZ');
-    const rotationMatrix = new THREE.Matrix4().makeRotationFromEuler(euler);
-
-    // Применяем матрицу вращения к текстуре
-    hdrTexture.rotation = rotationMatrix;
-    scene.background = hdrTexture;
-    scene.environment = hdrTexture;
+    // Поворачиваем сферу согласно текущим значениям
+    skybox.rotation.set(rotationX, rotationY, rotationZ);
 }
 
 // Создаем слайдеры для управления поворотом
