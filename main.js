@@ -20,107 +20,13 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 5, 5);
 scene.add(light);
 
-// Переменные для управления поворотом HDR
-let rotationX = 0;
-let rotationY = 0;
-let rotationZ = 0;
-
 // Загружаем HDR-текстуру для фона
-let hdrTexture;
 const rgbeLoader = new RGBELoader();
 rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@287f9f663fbc636a52c883a5cc8ec0cf8eb7acd5/public/sci-fi.hdr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
-    hdrTexture = texture;
-    // Создаем сферу для отображения HDR-текстуры
-    const sphereMaterial = new THREE.MeshBasicMaterial({
-        map: hdrTexture,
-        side: THREE.BackSide
-    });
-    const sphereGeometry = new THREE.SphereBufferGeometry(500, 64, 32);
-    const skybox = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    scene.add(skybox);
-    updateHDROrientation(); // Применяем начальную ориентацию после загрузки текстуры
+    scene.background = texture;
+    scene.environment = texture;
 });
-
-// Функция для обновления ориентации HDR
-function updateHDROrientation() {
-    const skybox = scene.getObjectByProperty('type', 'Mesh'); // Находим сферу в сцене
-    if (!skybox) return;
-    // Поворачиваем сферу согласно текущим значениям
-    skybox.rotation.set(rotationX, rotationY, rotationZ);
-}
-
-// Создаем слайдеры для управления поворотом
-function createRotationSliders() {
-    const sliderContainer = document.createElement('div');
-    sliderContainer.style.position = 'absolute';
-    sliderContainer.style.top = '10px';
-    sliderContainer.style.left = '10px';
-    sliderContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    sliderContainer.style.padding = '10px';
-    sliderContainer.style.color = 'white';
-    sliderContainer.style.fontFamily = 'Arial, sans-serif';
-    sliderContainer.style.zIndex = '1000';
-    document.body.appendChild(sliderContainer);
-
-    function createSlider(label, defaultValue, onChange) {
-        const container = document.createElement('div');
-        container.style.marginBottom = '10px';
-        const labelElement = document.createElement('label');
-        labelElement.textContent = label;
-        container.appendChild(labelElement);
-        const slider = document.createElement('input');
-        slider.type = 'range';
-        slider.min = -Math.PI;
-        slider.max = Math.PI;
-        slider.step = 0.01;
-        slider.value = defaultValue;
-        slider.style.width = '150px';
-        slider.addEventListener('input', (event) => {
-            const value = parseFloat(event.target.value);
-            onChange(value);
-        });
-        container.appendChild(slider);
-        sliderContainer.appendChild(container);
-        return slider;
-    }
-
-    const xSlider = createSlider('Rotate X:', 0, (value) => {
-        rotationX = value;
-        updateHDROrientation();
-    });
-
-    const ySlider = createSlider('Rotate Y:', 0, (value) => {
-        rotationY = value;
-        updateHDROrientation();
-    });
-
-    const zSlider = createSlider('Rotate Z:', 0, (value) => {
-        rotationZ = value;
-        updateHDROrientation();
-    });
-
-    return { xSlider, ySlider, zSlider };
-}
-
-// Создаем слайдеры
-const sliders = createRotationSliders();
-
-// Когда вы определите нужные значения, удалите слайдеры и задайте поворот напрямую в коде
-function lockHDRValues() {
-    const finalRotationX = parseFloat(sliders.xSlider.value);
-    const finalRotationY = parseFloat(sliders.ySlider.value);
-    const finalRotationZ = parseFloat(sliders.zSlider.value);
-    console.log(`Final HDR Rotation: X=${finalRotationX}, Y=${finalRotationY}, Z=${finalRotationZ}`);
-    // Удаляем слайдеры из DOM
-    document.querySelector('.slider-container').remove();
-    // Закрепляем значения в коде
-    rotationX = finalRotationX;
-    rotationY = finalRotationY;
-    rotationZ = finalRotationZ;
-    // Обновляем ориентацию без слайдеров
-    updateHDROrientation();
-}
 
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -147,6 +53,89 @@ document.body.appendChild(scoreElement);
 
 function updateScore() {
     scoreElement.innerHTML = `Killed: ${killedEnemies}`;
+}
+
+// Управление игроком
+const keys = {};
+window.addEventListener('keydown', (event) => {
+    keys[event.key.toLowerCase()] = true;
+});
+window.addEventListener('keyup', (event) => {
+    keys[event.key.toLowerCase()] = false;
+});
+
+function movePlayer() {
+    const speed = 0.1;
+    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -2);
+    if (keys['d']) player.position.x = Math.min(player.position.x + speed, 2);
+}
+
+// Враги
+const enemies = [];
+function createEnemy() {
+    if (gameOver) return;
+
+    const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+    const material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+    const enemy = new THREE.Mesh(geometry, material);
+    enemy.position.x = Math.random() * 4 - 2;
+    enemy.position.z = -40;
+    scene.add(enemy);
+    enemies.push(enemy);
+}
+setInterval(createEnemy, 2000);
+
+function moveEnemies() {
+    if (gameOver) return;
+
+    enemies.forEach((enemy, index) => {
+        enemy.position.z += 0.1;
+        if (enemy.position.z > 5 || enemy.position.x < -2 || enemy.position.x > 2) {
+            scene.remove(enemy);
+            enemies.splice(index, 1);
+        }
+    });
+}
+
+// Пули
+const bullets = [];
+function shoot() {
+    const geometry = new THREE.SphereGeometry(0.1, 4, 4);
+    const material = new THREE.MeshPhongMaterial({ color: 0xffff00 });
+    const bullet = new THREE.Mesh(geometry, material);
+    bullet.position.copy(player.position);
+    bullet.position.z -= 0.5;
+    scene.add(bullet);
+    bullets.push(bullet);
+}
+window.addEventListener('keydown', (event) => {
+    if (event.code === 'Space') shoot();
+});
+
+function moveBullets() {
+    bullets.forEach((bullet, index) => {
+        bullet.position.z -= 0.5;
+        if (bullet.position.z < -40 || bullet.position.x < -5 || bullet.position.x > 5) {
+            scene.remove(bullet);
+            bullets.splice(index, 1);
+        }
+    });
+}
+
+function checkCollisions() {
+    bullets.forEach((bullet, bulletIndex) => {
+        enemies.forEach((enemy, enemyIndex) => {
+            const distance = bullet.position.distanceTo(enemy.position);
+            if (distance < 0.5) {
+                scene.remove(bullet);
+                scene.remove(enemy);
+                bullets.splice(bulletIndex, 1);
+                enemies.splice(enemyIndex, 1);
+                killedEnemies++;
+                updateScore();
+            }
+        });
+    });
 }
 
 // Обработка столкновений врагов с игроком
@@ -245,9 +234,38 @@ function takeDamage() {
     }
 }
 
+// Функция для обновления позиции камеры
+function updateCameraPosition() {
+    if (gameOver) return;
+
+    const cameraOffsetX = 0;
+    const cameraOffsetY = 2;
+    const cameraOffsetZ = 5;
+    camera.position.x = player.position.x + cameraOffsetX;
+    camera.position.y = player.position.y + cameraOffsetY;
+    camera.position.z = player.position.z + cameraOffsetZ;
+}
+
 // Основной игровой цикл
 function animate() {
     requestAnimationFrame(animate);
+
+    if (!gameOver) {
+        movePlayer();
+        moveEnemies();
+    }
+
+    moveBullets();
+    moveEnemyBullets();
+    shootEnemyBullets();
+    checkCollisions();
+    checkPlayerCollisions();
+    checkEnemyBulletCollisions();
+
+    if (!gameOver) {
+        updateCameraPosition();
+    }
+
     renderer.render(scene, camera);
 }
 animate();
