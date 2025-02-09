@@ -22,7 +22,7 @@ scene.add(light);
 
 // Загружаем HDR-текстуру для фона
 const rgbeLoader = new RGBELoader();
-rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@a97177e6eb81d2ac2da4fc227afb4a41e939a0f5/public/sci-fi.hdr', (texture) => {
+rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@5418d4ee7e14133480338c66ad04c096ff9805d9/public/sci-fi.hdr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping; // Устанавливаем тип отображения
     scene.background = texture; // Устанавливаем текстуру как фон сцены
     scene.environment = texture; // Используем ту же текстуру для окружения
