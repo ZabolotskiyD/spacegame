@@ -22,7 +22,7 @@ scene.add(light);
 
 // Загружаем HDR-текстуру для фона
 const rgbeLoader = new RGBELoader();
-rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@0c6fd5e0e2c645bc4e03d6b5d11c1cba9bf7445c/public/sci-fi-alien-planet-landscape-aerial_1K.hdr', (texture) => {
+rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@a97177e6eb81d2ac2da4fc227afb4a41e939a0f5/public/sci-fi.hdr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping; // Устанавливаем тип отображения
     scene.background = texture; // Устанавливаем текстуру как фон сцены
     scene.environment = texture; // Используем ту же текстуру для окружения
