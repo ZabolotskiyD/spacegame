@@ -20,6 +20,11 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 5, 5);
 scene.add(light);
 
+// Переменные для управления поворотом HDR
+let rotationX = 0;
+let rotationY = 0;
+let rotationZ = 0;
+
 // Загружаем HDR-текстуру для фона
 let hdrTexture;
 const rgbeLoader = new RGBELoader();
@@ -29,39 +34,18 @@ rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@b884c7b6b1c9
     updateHDROrientation(); // Применяем начальную ориентацию после загрузки текстуры
 });
 
-// Переменные для управления поворотом HDR
-let rotationX = 0;
-let rotationY = 0;
-let rotationZ = 0;
-
 // Функция для обновления ориентации HDR
 function updateHDROrientation() {
     if (!hdrTexture) return;
 
-    const cubeCamera = new THREE.CubeCamera(1, 10000, 512); // Создаем кубическую камеру для пересчета окружения
-    scene.add(cubeCamera);
+    // Создаем матрицу вращения для HDR-текстуры
+    const euler = new THREE.Euler(rotationX, rotationY, rotationZ, 'XYZ');
+    const rotationMatrix = new THREE.Matrix4().makeRotationFromEuler(euler);
 
-    const sphereMaterial = new THREE.MeshBasicMaterial({
-        map: hdrTexture,
-        side: THREE.BackSide
-    });
-    const sphereGeometry = new THREE.SphereBufferGeometry(500, 64, 32);
-    const skybox = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    scene.add(skybox);
-
-    // Поворачиваем сферу согласно текущим значениям
-    skybox.rotation.set(rotationX, rotationY, rotationZ);
-
-    // Рендерим кубическую карту
-    cubeCamera.position.set(0, 0, 0);
-    cubeCamera.update(renderer, scene);
-
-    // Устанавливаем новое окружение
-    scene.environment = cubeCamera.renderTarget.texture;
-
-    // Удаляем временные объекты
-    scene.remove(skybox);
-    scene.remove(cubeCamera);
+    // Применяем матрицу вращения к текстуре
+    hdrTexture.rotation = rotationMatrix;
+    scene.background = hdrTexture;
+    scene.environment = hdrTexture;
 }
 
 // Создаем слайдеры для управления поворотом
@@ -144,8 +128,6 @@ function lockHDRValues() {
     updateHDROrientation();
 }
 
-// Вызовите lockHDRValues(), когда будете готовы зафиксировать значения
-
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
@@ -172,8 +154,6 @@ document.body.appendChild(scoreElement);
 function updateScore() {
     scoreElement.innerHTML = `Killed: ${killedEnemies}`;
 }
-
-// Остальной код игры остается без изменений...
 
 // Основной игровой цикл
 function animate() {
