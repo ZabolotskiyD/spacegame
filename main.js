@@ -23,7 +23,8 @@ scene.add(light);
 // Загружаем HDR-текстуру для фона
 let backgroundSphere;
 const rgbeLoader = new RGBELoader();
-rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@a7474ffbd33113de3a808410386d7f5a70057bf0/public/sci-fi.hdr', (texture) => {
+//rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@a7474ffbd33113de3a808410386d7f5a70057bf0/public/sci-fi.hdr', (texture) => {
+rgbeLoader.load('./public/sci-fi.hdr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     const backgroundMaterial = new THREE.MeshBasicMaterial({
         map: texture,
@@ -133,11 +134,13 @@ function moveEnemies() {
 const bullets = [];
 let canShoot = true; // Флаг, разрешающий стрельбу
 const fireRateDelay = 200; // Задержка между выстрелами в миллисекундах
+let isShooting = false; // Переменная для отслеживания состояния стрельбы
 
 function shoot() {
-    if (!canShoot) return; // Если стрельба заблокирована, выходим
+    if (!canShoot || energy < energyCost) return; // Если стрельба заблокирована или энергии недостаточно, выходим
 
     canShoot = false; // Блокируем стрельбу
+    energy -= energyCost; // Уменьшаем энергию
 
     const geometry = new THREE.SphereGeometry(0.1, 4, 4);
     const material = new THREE.MeshPhongMaterial({ color: 0xffff00 });
@@ -146,6 +149,8 @@ function shoot() {
     bullet.position.z -= 0.5;
     scene.add(bullet);
     bullets.push(bullet);
+
+    updateEnergyBar(); // Обновляем индикатор энергии
 
     // Разблокируем стрельбу через задержку
     setTimeout(() => {
@@ -166,6 +171,38 @@ function moveBullets() {
         }
     });
 }
+
+//Энергия
+let energy = 100; // Текущая энергия
+const maxEnergy = 100; // Максимальная энергия
+const energyCost = 20; // Стоимость одного выстрела
+const energyRecoveryRate = 0.5; // Скорость восстановления энергии (за кадр)
+
+// Создаем индикатор энергии
+const energyBar = document.createElement('div');
+energyBar.style.position = 'absolute';
+energyBar.style.top = '50px';
+energyBar.style.left = '20px';
+energyBar.style.width = '100px';
+energyBar.style.height = '20px';
+energyBar.style.backgroundColor = 'gray';
+document.body.appendChild(energyBar);
+
+const energyBarInner = document.createElement('div');
+energyBarInner.style.position = 'absolute';
+energyBarInner.style.top = '0';
+energyBarInner.style.left = '0';
+energyBarInner.style.width = '100%';
+energyBarInner.style.height = '100%';
+energyBarInner.style.backgroundColor = 'blue';
+energyBar.appendChild(energyBarInner);
+
+// Функция обновления индикатора энергии
+function updateEnergyBar() {
+    const percentage = (energy / maxEnergy) * 100;
+    energyBarInner.style.width = `${percentage}%`;
+}
+
 
 // Аптечки
 let activeHealthPack = null; // Текущая активная аптечка
@@ -365,6 +402,10 @@ function animate() {
         backgroundSphere.rotation.y = 20;
     }
     if (!gameOver) {
+        if (energy < maxEnergy) {
+            energy = Math.min(energy + energyRecoveryRate, maxEnergy);
+            updateEnergyBar(); // Обновляем индикатор энергии
+        }
         movePlayer();
         moveEnemies();
         moveBullets();
