@@ -4,7 +4,7 @@ import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-    60,
+    65,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
@@ -20,28 +20,19 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 5, 5);
 scene.add(light);
 
-// Функция для установки поворота HDR
-function setHDROrientation(rotationX, rotationY, rotationZ) {
-    const euler = new THREE.Euler(rotationX, rotationY, rotationZ, 'XYZ');
-    const rotationMatrix = new THREE.Matrix4().makeRotationFromEuler(euler);
-
-    if (hdrTexture) {
-        hdrTexture.rotation = rotationMatrix;
-        scene.background = hdrTexture;
-        scene.environment = hdrTexture;
-    }
-}
-
 // Загружаем HDR-текстуру для фона
-let hdrTexture;
+let backgroundSphere;
 const rgbeLoader = new RGBELoader();
-rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@287f9f663fbc636a52c883a5cc8ec0cf8eb7acd5/public/sci-fi.hdr', (texture) => {
+rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@/public/sci-fi.hdr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
-    hdrTexture = texture;
-
-    // Устанавливаем фиксированный поворот HDR
-    // Вы можете изменить эти значения на те, которые найдете в Blender
-    setHDROrientation(0, Math.PI / 2, 0); // Пример: поворот на 90 градусов вокруг оси Y
+    const backgroundMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.BackSide
+    });
+    const backgroundGeometry = new THREE.SphereGeometry(100, 64, 64);
+    backgroundSphere = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+    scene.add(backgroundSphere);
+    backgroundSphere.rotation.y = (2 * Math.PI) / 2;
 });
 
 // Создаем куб (игрок)
@@ -52,8 +43,7 @@ player.position.set(0, 0, 0);
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, 10);
-camera.lookAt(player.position);
+camera.position.set(0, 2, 4);
 
 // Счётчик убитых врагов
 let killedEnemies = 0;
@@ -66,7 +56,6 @@ scoreElement.style.fontFamily = 'Arial, sans-serif';
 scoreElement.style.fontSize = '20px';
 scoreElement.innerHTML = `Killed: ${killedEnemies}`;
 document.body.appendChild(scoreElement);
-
 function updateScore() {
     scoreElement.innerHTML = `Killed: ${killedEnemies}`;
 }
@@ -79,11 +68,11 @@ window.addEventListener('keydown', (event) => {
 window.addEventListener('keyup', (event) => {
     keys[event.key.toLowerCase()] = false;
 });
-
+const borderLimit = 3.5;
 function movePlayer() {
     const speed = 0.1;
-    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -2);
-    if (keys['d']) player.position.x = Math.min(player.position.x + speed, 2);
+    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -borderLimit);
+    if (keys['d']) player.position.x = Math.min(player.position.x + speed, borderLimit);
 }
 
 // Враги
@@ -94,23 +83,47 @@ function createEnemy() {
     const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
     const material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
     const enemy = new THREE.Mesh(geometry, material);
+
+    // Установка начальной позиции врага
     enemy.position.x = Math.random() * 4 - 2;
     enemy.position.z = -40;
+
+    // Определяем скорость врага
+    enemy.speed = Math.random() * 0.2 + 0.05;
+
+    // Частота выстрелов зависит от скорости врага (меньше скорость — больше частота)
+    enemy.shootFrequency = Math.max(0.01, 0.05 - enemy.speed); // От 0.01 до 0.05
+
     scene.add(enemy);
     enemies.push(enemy);
 }
-setInterval(createEnemy, 2000);
+
+// Обновление функции создания врагов на основе счета
+function createEnemiesBasedOnScore() {
+    if (gameOver) return;
+
+    const maxEnemies = killedEnemies >= 30 ? 3 : killedEnemies >= 15 ? 2 : 1;
+
+    for (let i = 0; i < maxEnemies; i++) {
+        createEnemy();
+    }
+}
+
+// Замена setInterval(createEnemy, 2000) на вызов новой функции
+setInterval(() => {
+    createEnemiesBasedOnScore();
+}, 2000);
 
 function moveEnemies() {
     if (gameOver) return;
-
-    enemies.forEach((enemy, index) => {
-        enemy.position.z += 0.1;
-        if (enemy.position.z > 5 || enemy.position.x < -2 || enemy.position.x > 2) {
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        const enemy = enemies[i];
+        enemy.position.z += enemy.speed;
+        if (enemy.position.z > 5 || enemy.position.x < -borderLimit || enemy.position.x > borderLimit) {
             scene.remove(enemy);
-            enemies.splice(index, 1);
+            enemies.splice(i, 1);
         }
-    });
+    }
 }
 
 // Пули
@@ -127,7 +140,6 @@ function shoot() {
 window.addEventListener('keydown', (event) => {
     if (event.code === 'Space') shoot();
 });
-
 function moveBullets() {
     bullets.forEach((bullet, index) => {
         bullet.position.z -= 0.5;
@@ -138,6 +150,45 @@ function moveBullets() {
     });
 }
 
+// Аптечки
+let activeHealthPack = null; // Текущая активная аптечка
+function createHealthPack(enemyPosition, enemySpeed) {
+    if (activeHealthPack) return; // Если уже есть активная аптечка, не создаём новую
+    const geometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+    const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+    const healthPack = new THREE.Mesh(geometry, material);
+    healthPack.position.copy(enemyPosition);
+    healthPack.speed = enemySpeed; // Аптечка наследует скорость врага
+    scene.add(healthPack);
+    activeHealthPack = healthPack;
+}
+function moveHealthPacks() {
+    if (!activeHealthPack) return;
+    // Движение аптечки по траектории врага
+    activeHealthPack.position.z += activeHealthPack.speed;
+    // Проверка столкновения с игроком
+    if (player.position.distanceTo(activeHealthPack.position) < 0.5) {
+        collectHealthPack();
+    }
+    // Если аптечка вышла за пределы видимости, удаляем её
+    if (activeHealthPack.position.z > 5) {
+        scene.remove(activeHealthPack);
+        activeHealthPack = null;
+    }
+}
+function collectHealthPack() {
+    playerHealth = Math.min(playerHealth + 2, maxHealth);
+    updateHealthBar();
+    scene.remove(activeHealthPack);
+    activeHealthPack = null;
+}
+function checkHealthPackConditions(enemyPosition, enemySpeed) {
+    if (playerHealth / maxHealth <= 0.3 && Math.random() < 0.5) {
+        createHealthPack(enemyPosition, enemySpeed);
+    }
+}
+
+// Обработка столкновений
 function checkCollisions() {
     bullets.forEach((bullet, bulletIndex) => {
         enemies.forEach((enemy, enemyIndex) => {
@@ -149,6 +200,7 @@ function checkCollisions() {
                 enemies.splice(enemyIndex, 1);
                 killedEnemies++;
                 updateScore();
+                checkHealthPackConditions(enemy.position, enemy.speed); // Передаём позицию и скорость врага
             }
         });
     });
@@ -158,7 +210,6 @@ function checkCollisions() {
 let gameOver = false;
 let playerHealth = 5;
 const maxHealth = 5;
-
 const healthBar = document.createElement('div');
 healthBar.style.position = 'absolute';
 healthBar.style.top = '20px';
@@ -167,7 +218,6 @@ healthBar.style.width = '100px';
 healthBar.style.height = '20px';
 healthBar.style.backgroundColor = 'gray';
 document.body.appendChild(healthBar);
-
 const healthBarInner = document.createElement('div');
 healthBarInner.style.position = 'absolute';
 healthBarInner.style.top = '0';
@@ -176,7 +226,6 @@ healthBarInner.style.width = '100%';
 healthBarInner.style.height = '100%';
 healthBarInner.style.backgroundColor = 'green';
 healthBar.appendChild(healthBarInner);
-
 function updateHealthBar() {
     const percentage = (playerHealth / maxHealth) * 100;
     healthBarInner.style.width = `${percentage}%`;
@@ -186,7 +235,6 @@ function updateHealthBar() {
         healthBarInner.style.backgroundColor = 'orange';
     }
 }
-
 updateHealthBar();
 
 function checkPlayerCollisions() {
@@ -196,6 +244,18 @@ function checkPlayerCollisions() {
             takeDamage();
         }
     });
+}
+
+function takeDamage() {
+    playerHealth--;
+    updateHealthBar();
+    if (playerHealth <= 0) {
+        gameOver = true;
+        console.log("Game Over!");
+        scene.remove(player);
+        alert("Game Over!");
+        location.reload();
+    }
 }
 
 // Пули врагов
@@ -211,7 +271,8 @@ function enemyShoot(enemy) {
 
 function shootEnemyBullets() {
     enemies.forEach((enemy) => {
-        if (Math.random() < 0.01) {
+        // Увеличиваем вероятность выстрела до 0.05 (5%)
+        if (Math.random() < enemy.shootFrequency) {
             enemyShoot(enemy);
         }
     });
@@ -238,50 +299,23 @@ function checkEnemyBulletCollisions() {
     });
 }
 
-function takeDamage() {
-    playerHealth--;
-    updateHealthBar();
-    if (playerHealth <= 0) {
-        gameOver = true;
-        console.log("Game Over!");
-        scene.remove(player);
-        alert("Game Over!");
-        location.reload(); // Перезагружаем страницу для перезапуска игры
-    }
-}
-
-// Функция для обновления позиции камеры
-function updateCameraPosition() {
-    if (gameOver) return;
-
-    const cameraOffsetX = 0;
-    const cameraOffsetY = 2;
-    const cameraOffsetZ = 5;
-    camera.position.x = player.position.x + cameraOffsetX;
-    camera.position.y = player.position.y + cameraOffsetY;
-    camera.position.z = player.position.z + cameraOffsetZ;
-}
-
 // Основной игровой цикл
 function animate() {
     requestAnimationFrame(animate);
-
+    if (backgroundSphere) {
+        backgroundSphere.rotation.y += 0.001;
+    }
     if (!gameOver) {
         movePlayer();
         moveEnemies();
     }
-
     moveBullets();
     moveEnemyBullets();
     shootEnemyBullets();
     checkCollisions();
     checkPlayerCollisions();
     checkEnemyBulletCollisions();
-
-    if (!gameOver) {
-        updateCameraPosition();
-    }
-
+    moveHealthPacks();
     renderer.render(scene, camera);
 }
 animate();
