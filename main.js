@@ -20,12 +20,28 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 5, 5);
 scene.add(light);
 
+// Функция для установки поворота HDR
+function setHDROrientation(rotationX, rotationY, rotationZ) {
+    const euler = new THREE.Euler(rotationX, rotationY, rotationZ, 'XYZ');
+    const rotationMatrix = new THREE.Matrix4().makeRotationFromEuler(euler);
+
+    if (hdrTexture) {
+        hdrTexture.rotation = rotationMatrix;
+        scene.background = hdrTexture;
+        scene.environment = hdrTexture;
+    }
+}
+
 // Загружаем HDR-текстуру для фона
+let hdrTexture;
 const rgbeLoader = new RGBELoader();
 rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@287f9f663fbc636a52c883a5cc8ec0cf8eb7acd5/public/sci-fi.hdr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
-    scene.background = texture;
-    scene.environment = texture;
+    hdrTexture = texture;
+
+    // Устанавливаем фиксированный поворот HDR
+    // Вы можете изменить эти значения на те, которые найдете в Blender
+    setHDROrientation(0, Math.PI / 2, 0); // Пример: поворот на 90 градусов вокруг оси Y
 });
 
 // Создаем куб (игрок)
