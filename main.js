@@ -4,7 +4,7 @@ import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-    60, // Угол обзора
+    60,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
@@ -22,28 +22,28 @@ scene.add(light);
 
 // Загружаем HDR-текстуру для фона
 const rgbeLoader = new RGBELoader();
-rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@5418d4ee7e14133480338c66ad04c096ff9805d9/public/sci-fi.hdr', (texture) => {
-    texture.mapping = THREE.EquirectangularReflectionMapping; // Устанавливаем тип отображения
-    scene.background = texture; // Устанавливаем текстуру как фон сцены
-    scene.environment = texture; // Используем ту же текстуру для окружения
+rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@b884c7b6b1c9352ace5d3c8e7d17b0ca2a480615/public/sci-fi.hdr', (texture) => {
+    texture.mapping = THREE.EquirectangularReflectionMapping;
+    scene.background = texture;
+    scene.environment = texture;
 });
 
 // Создаем куб (игрок)
 const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.set(0, 0, 0); // Игрок в начале координат
+player.position.set(0, 0, 0);
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, 10); // Камера выше и сзади игрока
-camera.lookAt(player.position); // Камера смотрит на игрока
+camera.position.set(0, 2, 10);
+camera.lookAt(player.position);
 
 // Счётчик убитых врагов
 let killedEnemies = 0;
 const scoreElement = document.createElement('div');
 scoreElement.style.position = 'absolute';
-scoreElement.style.bottom = '20px'; // Перемещаем счётчик вниз экрана
+scoreElement.style.bottom = '20px';
 scoreElement.style.right = '20px';
 scoreElement.style.color = 'white';
 scoreElement.style.fontFamily = 'Arial, sans-serif';
@@ -51,7 +51,6 @@ scoreElement.style.fontSize = '20px';
 scoreElement.innerHTML = `Killed: ${killedEnemies}`;
 document.body.appendChild(scoreElement);
 
-// Обновление счётчика
 function updateScore() {
     scoreElement.innerHTML = `Killed: ${killedEnemies}`;
 }
@@ -67,27 +66,30 @@ window.addEventListener('keyup', (event) => {
 
 function movePlayer() {
     const speed = 0.1;
-    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -2); // Левая граница
-    if (keys['d']) player.position.x = Math.min(player.position.x + speed, 2); // Правая граница
+    if (keys['a']) player.position.x = Math.max(player.position.x - speed, -2);
+    if (keys['d']) player.position.x = Math.min(player.position.x + speed, 2);
 }
 
 // Враги
 const enemies = [];
 function createEnemy() {
+    if (gameOver) return;
+
     const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
     const material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
     const enemy = new THREE.Mesh(geometry, material);
-    enemy.position.x = Math.random() * 4 - 2; // Случайная позиция от -2 до 2
-    enemy.position.z = -40; // Начинают далеко позади игрока
+    enemy.position.x = Math.random() * 4 - 2;
+    enemy.position.z = -40;
     scene.add(enemy);
     enemies.push(enemy);
 }
-setInterval(createEnemy, 2000); // Добавляем врагов каждые 2 секунды
+setInterval(createEnemy, 2000);
 
 function moveEnemies() {
+    if (gameOver) return;
+
     enemies.forEach((enemy, index) => {
-        enemy.position.z += 0.1; // Враги летят вперед
-        // Удаляем врагов, которые прошли мимо игрока или вышли за границы
+        enemy.position.z += 0.1;
         if (enemy.position.z > 5 || enemy.position.x < -2 || enemy.position.x > 2) {
             scene.remove(enemy);
             enemies.splice(index, 1);
@@ -102,7 +104,7 @@ function shoot() {
     const material = new THREE.MeshPhongMaterial({ color: 0xffff00 });
     const bullet = new THREE.Mesh(geometry, material);
     bullet.position.copy(player.position);
-    bullet.position.z -= 0.5; // Чуть впереди игрока
+    bullet.position.z -= 0.5;
     scene.add(bullet);
     bullets.push(bullet);
 }
@@ -112,8 +114,7 @@ window.addEventListener('keydown', (event) => {
 
 function moveBullets() {
     bullets.forEach((bullet, index) => {
-        bullet.position.z -= 0.5; // Пули летят вперед
-        // Удаляем пули, которые улетели далеко или вышли за границы
+        bullet.position.z -= 0.5;
         if (bullet.position.z < -40 || bullet.position.x < -5 || bullet.position.x > 5) {
             scene.remove(bullet);
             bullets.splice(index, 1);
@@ -126,12 +127,10 @@ function checkCollisions() {
         enemies.forEach((enemy, enemyIndex) => {
             const distance = bullet.position.distanceTo(enemy.position);
             if (distance < 0.5) {
-                // Удаляем пулю и врага
                 scene.remove(bullet);
                 scene.remove(enemy);
                 bullets.splice(bulletIndex, 1);
                 enemies.splice(enemyIndex, 1);
-                // Увеличиваем счётчик убитых врагов
                 killedEnemies++;
                 updateScore();
             }
@@ -140,15 +139,45 @@ function checkCollisions() {
 }
 
 // Обработка столкновений врагов с игроком
+let gameOver = false;
+let playerHealth = 5;
+const maxHealth = 5;
+
+const healthBar = document.createElement('div');
+healthBar.style.position = 'absolute';
+healthBar.style.top = '20px';
+healthBar.style.left = '20px';
+healthBar.style.width = '100px';
+healthBar.style.height = '20px';
+healthBar.style.backgroundColor = 'gray';
+document.body.appendChild(healthBar);
+
+const healthBarInner = document.createElement('div');
+healthBarInner.style.position = 'absolute';
+healthBarInner.style.top = '0';
+healthBarInner.style.left = '0';
+healthBarInner.style.width = '100%';
+healthBarInner.style.height = '100%';
+healthBarInner.style.backgroundColor = 'green';
+healthBar.appendChild(healthBarInner);
+
+function updateHealthBar() {
+    const percentage = (playerHealth / maxHealth) * 100;
+    healthBarInner.style.width = `${percentage}%`;
+    if (percentage <= 20) {
+        healthBarInner.style.backgroundColor = 'red';
+    } else if (percentage <= 50) {
+        healthBarInner.style.backgroundColor = 'orange';
+    }
+}
+
+updateHealthBar();
+
 function checkPlayerCollisions() {
     enemies.forEach((enemy, index) => {
         const distance = player.position.distanceTo(enemy.position);
-        if (distance < 0.8) { // Пороговое значение для столкновения
-            console.log("Game Over!"); // Выводим сообщение о конце игры
-            scene.remove(player); // Удаляем игрока
-            scene.remove(enemy); // Удаляем врага
-            enemies.splice(index, 1); // Удаляем врага из массива
-            alert("Game Over!"); // Оповещаем игрока
+        if (distance < 0.8 && !gameOver) {
+            takeDamage();
         }
     });
 }
@@ -157,16 +186,16 @@ function checkPlayerCollisions() {
 const enemyBullets = [];
 function enemyShoot(enemy) {
     const geometry = new THREE.SphereGeometry(0.1, 4, 4);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff00ff }); // Розовый цвет
+    const material = new THREE.MeshPhongMaterial({ color: 0xff00ff });
     const bullet = new THREE.Mesh(geometry, material);
-    bullet.position.copy(enemy.position); // Пуля появляется в позиции врага
+    bullet.position.copy(enemy.position);
     scene.add(bullet);
     enemyBullets.push(bullet);
 }
 
 function shootEnemyBullets() {
     enemies.forEach((enemy) => {
-        if (Math.random() < 0.01) { // Вероятность выстрела (1% на кадр)
+        if (Math.random() < 0.01) {
             enemyShoot(enemy);
         }
     });
@@ -174,8 +203,7 @@ function shootEnemyBullets() {
 
 function moveEnemyBullets() {
     enemyBullets.forEach((bullet, index) => {
-        bullet.position.z += 0.3; // Пули летят вперёд
-        // Удаляем пули, которые улетели далеко или вышли за границы
+        bullet.position.z += 0.3;
         if (bullet.position.z > 10 || bullet.position.x < -5 || bullet.position.x > 5) {
             scene.remove(bullet);
             enemyBullets.splice(index, 1);
@@ -186,23 +214,32 @@ function moveEnemyBullets() {
 function checkEnemyBulletCollisions() {
     enemyBullets.forEach((bullet, index) => {
         const distance = player.position.distanceTo(bullet.position);
-        if (distance < 0.5) { // Пороговое значение для столкновения
-            console.log("Game Over!"); // Выводим сообщение о конце игры
-            scene.remove(player); // Удаляем игрока
-            scene.remove(bullet); // Удаляем пулю
-            enemyBullets.splice(index, 1); // Удаляем пулю из массива
-            alert("Game Over!"); // Оповещаем игрока
+        if (distance < 0.5 && !gameOver) {
+            takeDamage();
+            scene.remove(bullet);
+            enemyBullets.splice(index, 1);
         }
     });
 }
 
+function takeDamage() {
+    playerHealth--;
+    updateHealthBar();
+    if (playerHealth <= 0) {
+        gameOver = true;
+        console.log("Game Over!");
+        scene.remove(player);
+        alert("Game Over!");
+    }
+}
+
 // Функция для обновления позиции камеры
 function updateCameraPosition() {
-    const cameraOffsetX = 0; // Камера не смещается по X относительно игрока
-    const cameraOffsetY = 2; // Камера находится выше игрока (например, на 2 единицы)
-    const cameraOffsetZ = 5; // Камера находится сзади игрока
+    if (gameOver) return;
 
-    // Позиция камеры
+    const cameraOffsetX = 0;
+    const cameraOffsetY = 2;
+    const cameraOffsetZ = 5;
     camera.position.x = player.position.x + cameraOffsetX;
     camera.position.y = player.position.y + cameraOffsetY;
     camera.position.z = player.position.z + cameraOffsetZ;
@@ -211,15 +248,23 @@ function updateCameraPosition() {
 // Основной игровой цикл
 function animate() {
     requestAnimationFrame(animate);
-    movePlayer(); // Двигаем игрока
-    moveEnemies();
+
+    if (!gameOver) {
+        movePlayer();
+        moveEnemies();
+    }
+
     moveBullets();
     moveEnemyBullets();
     shootEnemyBullets();
     checkCollisions();
     checkPlayerCollisions();
     checkEnemyBulletCollisions();
-    updateCameraPosition(); // Обновляем позицию камеры
+
+    if (!gameOver) {
+        updateCameraPosition();
+    }
+
     renderer.render(scene, camera);
 }
 animate();
