@@ -8,7 +8,8 @@
     <style>
         body {
             margin: 0;
-            overflow: hidden; /* Отключаем прокрутку */
+            overflow: hidden;
+            /* Отключаем прокрутку */
         }
 
         canvas {
@@ -26,11 +27,22 @@
 </head>
 
 <body>
+    <!-- Контейнер для Three.js -->
     <div id="three-container"></div>
+
+    <!-- Текстовое наложение -->
     <div id="text-overlay">Hello, my guest!</div>
+
+    <!-- Модальное окно Game Over -->
+    <div id="gameOverModal"
+        style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid black;">
+        <h1>Game Over!</h1>
+        <p>You killed <span id="killedEnemiesCount">0</span> enemies.</p>
+        <button id="restartButton">Restart</button>
+    </div>
+
     <!-- Подключаем main.js как модуль -->
-    <script type="module"
-        src="/main.js"></script>
+    <script type="module" src="/main.js"></script>
 </body>
 
 </html>

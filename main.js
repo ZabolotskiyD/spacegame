@@ -4,7 +4,7 @@ import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 // Создаем сцену, камеру и рендерер
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-    65,
+    55,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
@@ -23,7 +23,7 @@ scene.add(light);
 // Загружаем HDR-текстуру для фона
 let backgroundSphere;
 const rgbeLoader = new RGBELoader();
-rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@/public/sci-fi.hdr', (texture) => {
+rgbeLoader.load('https://cdn.jsdelivr.net/gh/zabolotskiyd/spacegame@a7474ffbd33113de3a808410386d7f5a70057bf0/public/sci-fi.hdr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     const backgroundMaterial = new THREE.MeshBasicMaterial({
         map: texture,
@@ -43,17 +43,20 @@ player.position.set(0, 0, 0);
 scene.add(player);
 
 // Начальная позиция камеры
-camera.position.set(0, 2, 4);
+camera.position.set(0, 2, 5);
 
 // Счётчик убитых врагов
 let killedEnemies = 0;
 const scoreElement = document.createElement('div');
 scoreElement.style.position = 'absolute';
-scoreElement.style.bottom = '20px';
+scoreElement.style.top = '20px';
 scoreElement.style.right = '20px';
 scoreElement.style.color = 'white';
 scoreElement.style.fontFamily = 'Arial, sans-serif';
 scoreElement.style.fontSize = '20px';
+
+
+
 scoreElement.innerHTML = `Killed: ${killedEnemies}`;
 document.body.appendChild(scoreElement);
 function updateScore() {
@@ -68,7 +71,7 @@ window.addEventListener('keydown', (event) => {
 window.addEventListener('keyup', (event) => {
     keys[event.key.toLowerCase()] = false;
 });
-const borderLimit = 3.5;
+const borderLimit = 4;
 function movePlayer() {
     const speed = 0.1;
     if (keys['a']) player.position.x = Math.max(player.position.x - speed, -borderLimit);
@@ -85,7 +88,7 @@ function createEnemy() {
     const enemy = new THREE.Mesh(geometry, material);
 
     // Установка начальной позиции врага
-    enemy.position.x = Math.random() * 4 - 2;
+    enemy.position.x = Math.random() * 8 - 4;
     enemy.position.z = -40;
 
     // Определяем скорость врага
@@ -128,7 +131,14 @@ function moveEnemies() {
 
 // Пули
 const bullets = [];
+let canShoot = true; // Флаг, разрешающий стрельбу
+const fireRateDelay = 200; // Задержка между выстрелами в миллисекундах
+
 function shoot() {
+    if (!canShoot) return; // Если стрельба заблокирована, выходим
+
+    canShoot = false; // Блокируем стрельбу
+
     const geometry = new THREE.SphereGeometry(0.1, 4, 4);
     const material = new THREE.MeshPhongMaterial({ color: 0xffff00 });
     const bullet = new THREE.Mesh(geometry, material);
@@ -136,10 +146,17 @@ function shoot() {
     bullet.position.z -= 0.5;
     scene.add(bullet);
     bullets.push(bullet);
+
+    // Разблокируем стрельбу через задержку
+    setTimeout(() => {
+        canShoot = true;
+    }, fireRateDelay);
 }
+
 window.addEventListener('keydown', (event) => {
     if (event.code === 'Space') shoot();
 });
+
 function moveBullets() {
     bullets.forEach((bullet, index) => {
         bullet.position.z -= 0.5;
@@ -178,12 +195,30 @@ function moveHealthPacks() {
 }
 function collectHealthPack() {
     playerHealth = Math.min(playerHealth + 2, maxHealth);
-    updateHealthBar();
+    updateHealthBar(); // Обновляем цвет полоски здоровья после получения аптечки
     scene.remove(activeHealthPack);
     activeHealthPack = null;
 }
 function checkHealthPackConditions(enemyPosition, enemySpeed) {
-    if (playerHealth / maxHealth <= 0.3 && Math.random() < 0.5) {
+    let dropChance = 0; // Вероятность выпадения аптечки
+
+    // Условие 1: Если убито больше 15 врагов и здоровье меньше 50%
+    if (killedEnemies > 15 && playerHealth / maxHealth < 0.5) {
+        dropChance = 0.5; // Вероятность 50%
+    }
+
+    // Условие 2: Если убито больше 35 врагов и здоровье меньше 50%
+    if (killedEnemies > 35 && playerHealth / maxHealth < 0.5) {
+        dropChance = 0.65; // Вероятность 65%
+    }
+
+    // Условие 3: Если убито больше 35 врагов и здоровье меньше 70%, каждые 10 убийств
+    if (killedEnemies > 35 && playerHealth / maxHealth < 0.7 && killedEnemies % 10 === 0) {
+        dropChance = 0.5; // Вероятность 50%
+    }
+
+    // Проверяем, выпадет ли аптечка
+    if (Math.random() < dropChance) {
         createHealthPack(enemyPosition, enemySpeed);
     }
 }
@@ -233,6 +268,8 @@ function updateHealthBar() {
         healthBarInner.style.backgroundColor = 'red';
     } else if (percentage <= 50) {
         healthBarInner.style.backgroundColor = 'orange';
+    } else {
+        healthBarInner.style.backgroundColor = 'green';
     }
 }
 updateHealthBar();
@@ -246,6 +283,16 @@ function checkPlayerCollisions() {
     });
 }
 
+function showGameOverModal() {
+    const modal = document.getElementById('gameOverModal');
+    modal.style.display = 'block';
+
+    const restartButton = document.getElementById('restartButton');
+    restartButton.addEventListener('click', () => {
+        location.reload(); // Перезагрузка страницы
+    });
+}
+
 function takeDamage() {
     playerHealth--;
     updateHealthBar();
@@ -253,8 +300,20 @@ function takeDamage() {
         gameOver = true;
         console.log("Game Over!");
         scene.remove(player);
-        alert("Game Over!");
-        location.reload();
+
+        // Обновляем текст с количеством убитых врагов
+        const killedEnemiesCountElement = document.getElementById('killedEnemiesCount');
+        killedEnemiesCountElement.textContent = killedEnemies;
+
+        // Показываем модальное окно
+        const modal = document.getElementById('gameOverModal');
+        modal.style.display = 'block';
+
+        // Добавляем обработчик для кнопки "Restart"
+        const restartButton = document.getElementById('restartButton');
+        restartButton.addEventListener('click', () => {
+            location.reload(); // Перезагружаем страницу для рестарта игры
+        });
     }
 }
 
@@ -303,19 +362,20 @@ function checkEnemyBulletCollisions() {
 function animate() {
     requestAnimationFrame(animate);
     if (backgroundSphere) {
-        backgroundSphere.rotation.y += 0.001;
+        backgroundSphere.rotation.y = 20;
     }
     if (!gameOver) {
         movePlayer();
         moveEnemies();
+        moveBullets();
+        moveEnemyBullets();
+        shootEnemyBullets();
+        checkCollisions();
+        checkPlayerCollisions();
+        checkEnemyBulletCollisions();
+        moveHealthPacks();
     }
-    moveBullets();
-    moveEnemyBullets();
-    shootEnemyBullets();
-    checkCollisions();
-    checkPlayerCollisions();
-    checkEnemyBulletCollisions();
-    moveHealthPacks();
+
     renderer.render(scene, camera);
 }
 animate();
